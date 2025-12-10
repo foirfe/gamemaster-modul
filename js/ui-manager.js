@@ -1,4 +1,6 @@
 //UI MANAGER
+export function initSidebar () {
+
 //Fanger task-sidebar
 const sidebar = document.getElementById("task-sidebar");
 
@@ -53,3 +55,4 @@ saveBtn.addEventListener("click", () => {
     const type = select.value;
     console.log("Gem scenarie:", name, type)
 });
+}
