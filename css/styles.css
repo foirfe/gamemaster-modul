@@ -1,0 +1,14 @@
+/*GLOBAL STYLING*/
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Fylder hele vinduet */
+}
+
+/*Views*/
+.view-hidden {
+    display: none !important;
+}
+.view-active {
+    display: block; /* Eller grid/flex afhængigt af layout */
+}

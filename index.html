@@ -3,11 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /><!--LEAFLET STYLING-->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> <!--LEAFLET SCRIPT INIT-->
     <title>Gamemaster Modul</title>
 </head>
 <body>
-    
-    <script src="script.js"></script>
+   <section id="view-dashboard" class="view-active">
+        <h1>Velkommen Gamemaster</h1>
+        <div id="scenario-list">
+            </div>
+        <button id="btn-create-new" class="btn-primary">Opret Nyt Scenarie</button>
+    </section>
+
+    <section id="view-editor" class="view-hidden">
+        <header>
+            <button id="btn-back">Tilbage til oversigt</button>
+            <h2>Redigerer: <span id="current-scenario-title">...</span></h2>
+            <button id="btn-save">Gem & Eksporter</button>
+        </header>
+        
+        <div class="editor-layout">
+            <aside id="task-sidebar">
+                </aside>
+            <div id="map-container"></div>
+        </div>
+    </section>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
