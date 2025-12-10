@@ -31,3 +31,9 @@ importBtn.id = "import-task";
 importBtn.textContent = "Importer opgaver";
 sidebar.appendChild(importBtn);
 
+//Liste til opgave
+const taskList = document.createElement("div");
+taskList.id = "task-list";
+taskList.classList.add("scrollable-list");
+sidebar.appendChild(taskList);
+
