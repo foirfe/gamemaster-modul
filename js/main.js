@@ -1,4 +1,4 @@
-//Main
+//Main // test
 import { initMap } from './map-manager.js';
 
 //Navigation
