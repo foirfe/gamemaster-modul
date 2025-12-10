@@ -37,3 +37,8 @@ taskList.id = "task-list";
 taskList.classList.add("scrollable-list");
 sidebar.appendChild(taskList);
 
+//Gem-knap
+const saveBtn = document.createElement("button");
+saveBtn.id = "save-scenario";
+saveBtn.textContent = "Gem scenarie";
+sidebar.appendChild(saveBtn);
