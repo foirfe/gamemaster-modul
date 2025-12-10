@@ -24,3 +24,10 @@ optionWater.textContent = "vand";
 select.appendChild("optionWater");
 
 sidebar.appendChild(select);
+
+//Importér-knap
+const importBtn = document.createElement("button");
+importBtn.id = "import-task";
+importBtn.textContent = "Importer opgaver";
+sidebar.appendChild(importBtn);
+
