@@ -42,3 +42,14 @@ const saveBtn = document.createElement("button");
 saveBtn.id = "save-scenario";
 saveBtn.textContent = "Gem scenarie";
 sidebar.appendChild(saveBtn);
+
+//Eventlisteners
+importBtn.addEventListener("click", () => {
+    console.log("importer opgave klikket");
+});
+
+saveBtn.addEventListener("click", () => {
+    const name = input.value;
+    const type = select.value;
+    console.log("Gem scenarie:", name, type)
+});
