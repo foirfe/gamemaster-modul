@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=upload" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> <!--LEAFLET SCRIPT INIT-->
     <title>Gamemaster Modul</title>
 </head>
@@ -22,6 +23,17 @@
             <button id="btn-back">Tilbage til oversigt</button>
             <div class="editor-layout">
                 <aside id="task-sidebar">
+                <label for="scenario-name">Scenarie</label>
+                <input type="text" id="scenario-name" placeholder="Skriv scenarie navn">
+                <label for="scenario-type">Type</label>
+                <select name="type" id="scenario-type">
+                    <option value="choose">Vælg én</option>
+                    <option value="land">Land</option>
+                    <option value="vand">Vand</option>
+                </select>
+                <button id="btn-import">Importér opgaver<span class="material-symbols-outlined">
+                    upload
+                    </span></button>
                 <button id="btn-save">Gem</button>
                 </aside>
             <div id="map-container"></div>
