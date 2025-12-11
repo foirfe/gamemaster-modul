@@ -1,4 +1,10 @@
 /*COMPONENTS*/
+#view-editor{
+    #btn-back{
+        position: absolute;
+        z-index: 50;
+    }
+}
 #map-container {
     width: 100%;
     height: 100vh; /* 100% af Viewport Height - altså hele skærmen */
