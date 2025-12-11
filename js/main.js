@@ -20,9 +20,12 @@ function switchView(viewName) {
     }
 }
 // 2. Event Listeners
-document.getElementById('btn-create-new').addEventListener('click', () => {
+document.getElementById('btn-create-new').addEventListener('click', async () => {
     switchView('editor');
-    initMap('map-container')
+    initMap('map-container');
+    // hent tasks og tegn liste
+    await loadTasks();
+    renderTaskList();
 });
 
 document.getElementById('btn-back').addEventListener('click', () => {
@@ -33,7 +36,7 @@ document.getElementById('btn-back').addEventListener('click', () => {
 //Opret et scenario
 const scenario = new Scenario();
 scenario.scenarioId = "S1";
-scenario.scenarioTitle = "Finderup Natøvelse";
+scenario.scenarioTitle = "Finderup Natï¿½velse";
 scenario.scenarioEnvironment = "land";
 scenario.scenarioCreatedBy = "Bo";
 
@@ -44,7 +47,7 @@ task.taskId = "T15";
 task.taskTitle = "Patrulje i nat";
 task.mapType = "zone";
 
-//Tilføj til scenario
+//Tilfï¿½j til scenario
 scenario.tasks.push(task);
 
 //Opret options
@@ -58,7 +61,7 @@ optionB.optionId = "B";
 optionB.optionText = "Vil du ud og se";
 optionB.isCorrect = false;
 
-//Tilføj til task
+//Tilfï¿½j til task
 task.options.push(optionA, optionB);
 
 
@@ -84,7 +87,7 @@ async function loadTasks() {
         }
 
         allTasks = await response.json(); // gemmer arrayet
-        console.log('Tasks indlæst:', allTasks);
+        console.log('Tasks indlï¿½st:', allTasks);
     } catch (err) {
         console.error('Fejl i loadTasks():', err);
     }
@@ -104,19 +107,7 @@ function renderTaskList() {
 
     allTasks.forEach(task => {
         const li = document.createElement('li');
-        li.textContent = `${task.taskId} – ${task.taskTitle}`;
+        li.textContent = `${task.taskId} ï¿½ ${task.taskTitle}`;
         listEl.appendChild(li);
     });
 }
-
-// Når man klikker "Opret Nyt Scenarie"
-document.getElementById('btn-create-new').addEventListener('click', async () => {
-    console.log('Klik på Opret Nyt Scenarie');
-
-    switchView('editor');
-    initMap('map-container');
-
-    // hent tasks og tegn liste
-    await loadTasks();
-    renderTaskList();
-});
