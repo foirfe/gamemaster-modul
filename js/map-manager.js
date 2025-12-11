@@ -10,13 +10,15 @@ export function initMap(elementId) {
     }
     // 1. Opret kortet og sæt start-koordinater (Her centreret over Danmark)
     // [Latitude, Longitude], Zoom-level (1-19)
-    map = L.map(elementId).setView([56.2639, 9.5018], 7); 
+    map = L.map(elementId,{zoomControl: false}).setView([56.2639, 9.5018], 7);
+    L.control.zoom({
+        position: 'bottomright'
+    }).addTo(map);
     // 2. Tilføj selve kort-laget (Det visuelle "tapet" fra OpenStreetMap)
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
-
     return map;
 }
 // Tilføj en markør (når en opgave trækkes ind)

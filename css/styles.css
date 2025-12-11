@@ -1,10 +1,23 @@
 /*GLOBAL STYLING*/
+:root{
+    --primary-color: #3F5B58;
+    --secondary-color: #8D1B3D;
+    --background-color: #E9EBEB;
+    --military-green: #647851;
+    --navy-blue: #1D2C50;
+    --font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
 html, body {
     margin: 0;
     padding: 0;
     height: 100%; /* Fylder hele vinduet */
+    font-family: sans-serif; /*Fallback til ældre browsere*/
+    font-family: var(--headings);
+    background-color: var(--background-color);
 }
-
+h1, h2, h3 {
+    font-weight: bold;
+}
 /*Views*/
 .view-hidden {
     display: none !important;
