@@ -12,17 +12,17 @@
     <title>Gamemaster Modul</title>
 </head>
 <body>
-   <section id="view-dashboard" class="view-active">
+    <section id="view-dashboard" class="view-active">
         <h1>Velkommen Gamemaster</h1>
         <div id="scenario-list">
-            </div>
+        </div>
         <button id="btn-create-new" class="btn-primary">Opret Nyt Scenarie</button>
     </section>
 
     <section id="view-editor" class="view-hidden">
-            <button id="btn-back">Tilbage til oversigt</button>
-            <div class="editor-layout">
-                <aside id="task-sidebar">
+        <button id="btn-back">Tilbage til oversigt</button>
+        <div class="editor-layout">
+            <aside id="task-sidebar">
                 <label for="scenario-name">Scenarie</label>
                 <input type="text" id="scenario-name" placeholder="Skriv scenarie navn">
                 <label for="scenario-type">Type</label>
@@ -31,14 +31,24 @@
                     <option value="land">Land</option>
                     <option value="vand">Vand</option>
                 </select>
-                <button id="btn-import">Importér opgaver<span class="material-symbols-outlined">
-                    upload
-                    </span></button>
+                <button id="btn-import">
+                    Importér opgaver<span class="material-symbols-outlined">
+                        upload
+                    </span>
+                </button>
                 <button id="btn-save">Gem</button>
-                </aside>
+            </aside>
             <div id="map-container"></div>
         </div>
     </section>
+
+    <aside id="task-sidebar">
+        <button id="btn-save">Gem</button>
+
+        <h3>Tilgængelige opgaver</h3>
+        <ul id="task-list"></ul>
+    </aside>
+
     <script type="module" src="js/main.js"></script>
 </body>
 </html>

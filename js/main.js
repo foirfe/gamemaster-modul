@@ -2,7 +2,6 @@
 import { initMap } from './map-manager.js';
 import { Scenario, Task, Option } from './models.js';
 
-
 //Navigation
 const dashboardView = document.getElementById('view-dashboard');
 const editorView = document.getElementById('view-editor');
@@ -66,4 +65,58 @@ task.options.push(optionA, optionB);
 //JSON fil
 // JSON.stringify(value, replacer, space)
 const jsonString = JSON.stringify(scenario, null, 2);
-console.log(jsonString);
+console.log('Scenario JSON:', jsonString);
+
+// ====== TASKS FRA JSON ======
+
+let allTasks = []; // her gemmer vi tasks fra JSON
+
+// Hent tasks fra JSON-filen
+async function loadTasks() {
+    try {
+        console.log('loadTasks() kaldt');
+
+        const response = await fetch('data/dummy.json');  // filen i /data
+        console.log('HTTP status for dummy.json:', response.status);
+
+        if (!response.ok) {
+            throw new Error('Kunne ikke hente dummy.json, status: ' + response.status);
+        }
+
+        allTasks = await response.json(); // gemmer arrayet
+        console.log('Tasks indlæst:', allTasks);
+    } catch (err) {
+        console.error('Fejl i loadTasks():', err);
+    }
+}
+
+// Tegn listen i sidebar
+function renderTaskList() {
+    const listEl = document.getElementById('task-list');
+    if (!listEl) {
+        console.warn('Fandt ikke #task-list');
+        return;
+    }
+
+    console.log('renderTaskList() kaldt, antal tasks:', allTasks.length);
+
+    listEl.innerHTML = '';
+
+    allTasks.forEach(task => {
+        const li = document.createElement('li');
+        li.textContent = `${task.taskId} – ${task.taskTitle}`;
+        listEl.appendChild(li);
+    });
+}
+
+// Når man klikker "Opret Nyt Scenarie"
+document.getElementById('btn-create-new').addEventListener('click', async () => {
+    console.log('Klik på Opret Nyt Scenarie');
+
+    switchView('editor');
+    initMap('map-container');
+
+    // hent tasks og tegn liste
+    await loadTasks();
+    renderTaskList();
+});

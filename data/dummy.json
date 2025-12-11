@@ -1,3 +1,16 @@
-{
-    "name": "dummy"
-}
+[
+  {
+    "taskId": "T15",
+    "taskTitle": "Patrulje i nat",
+    "taskDescription": "Se efter i området for at se, om alt er ok",
+    "mapType": "zone",
+    "mapRadiusInMeters": 100
+  },
+  {
+    "taskId": "T8",
+    "taskTitle": "Observation nord",
+    "taskDescription": "Observation af aktivitet i området mod nord",
+    "mapType": "punkt",
+    "mapRadiusInMeters": 20
+  }
+]
