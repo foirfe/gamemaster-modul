@@ -14,8 +14,7 @@ export function getScenariosFromStorage() {
 }
 //Downloader data som en JSON-fil.
 export function downloadJSON(filename, data) {
-    const jsonString = JSON.stringify(data, null, 2); // Indrykning på 2 for læsbarhed
-    const blob = new Blob([jsonString], { type: "application/json" });
+    const blob = new Blob([data], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
