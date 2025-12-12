@@ -300,6 +300,7 @@ function resetEditor() {
     currentScenario.scenarioId = "S" + Date.now(); 
     currentScenario.scenarioCreatedBy = "Gamemaster"; // Her kunne der være en dynamisk bruger med auth.
     selectedTasks = [];
+    filteredTasks = null;
     // Nulstil UI felter
     document.getElementById('scenario-name').value = "";
     document.getElementById('scenario-type').value = "choose";
@@ -316,7 +317,7 @@ export async function editScenario(id) {
         console.error("Scenarie ikke fundet:", id);
         return;
     }
-
+    filteredTasks = null;
     // Sæt currentScenario til det fundne
     currentScenario = foundScenario;
 
