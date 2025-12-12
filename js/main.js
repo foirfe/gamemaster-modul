@@ -1,6 +1,7 @@
 //Main // test
 import { initMap } from './map-manager.js';
 import { Scenario, Task, Option } from './models.js';
+import { downloadJSON, saveScenarioToStorage } from './data-manager.js';
 
 //Navigation
 const dashboardView = document.getElementById('view-dashboard');
@@ -70,9 +71,10 @@ task.options.push(optionA, optionB);
 const jsonString = JSON.stringify(scenario, null, 2);
 console.log('Scenario JSON:', jsonString);
 
-// ====== TASKS FRA JSON ======
 
+//Json indlæsning fra Team 1
 let allTasks = []; // her gemmer vi tasks fra JSON
+let selectedTasks = [];   // opgaver som gamemaster har markeret
 
 // Hent tasks fra JSON-filen
 async function loadTasks() {
@@ -101,13 +103,108 @@ function renderTaskList() {
         return;
     }
 
-    console.log('renderTaskList() kaldt, antal tasks:', allTasks.length);
-
     listEl.innerHTML = '';
 
     allTasks.forEach(task => {
         const li = document.createElement('li');
-        li.textContent = `${task.taskId} � ${task.taskTitle}`;
+        li.classList.add('task-item');
+
+        li.innerHTML = `
+            <div class="task-item-title">${task.taskId} - ${task.taskTitle}</div>
+            <div class="task-item-desc">${task.taskDescription}</div>
+        `;
+
+        // Er denne task allerede markeret?
+        const isSelected = selectedTasks.some(t => t.taskId === task.taskId);
+        if (isSelected) {
+            li.classList.add('task-item-selected');
+        }
+
+        // Klik-håndtering: toggle markering + opdater selectedTasks
+        li.addEventListener('click', () => {
+            const index = selectedTasks.findIndex(t => t.taskId === task.taskId);
+
+            if (index === -1) {
+                // Ikke i listen endnu → tilføj
+                selectedTasks.push(task);
+                li.classList.add('task-item-selected');
+            } else {
+                // Allerede i listen → fjern
+                selectedTasks.splice(index, 1);
+                li.classList.remove('task-item-selected');
+            }
+
+            console.log('Valgte opgaver:', selectedTasks);
+        });
+
         listEl.appendChild(li);
     });
 }
+
+const scenariosData = localStorage.getItem('gamemaster_scenarios');
+
+
+console.log(scenariosData);
+ document.getElementById('download-btn').addEventListener('click', () => {
+    downloadJSON("Scenarios.json", localStorage.getItem('gamemaster_scenarios'));
+    })
+
+//Ny json fil
+document.getElementById('btn-save').addEventListener('click', () => {
+    // 1) Opdatér scenarie-info fra felterne i UI
+    const nameInput = document.getElementById('scenario-name');
+    const typeSelect = document.getElementById('scenario-type');
+
+    scenario.scenarioTitle = nameInput.value || "Uden navn";
+    scenario.scenarioEnvironment = typeSelect.value === "choose" ? "" : typeSelect.value;
+    scenario.scenarioCreatedTime = new Date();
+    scenario.scenarioIsActive = true;
+
+    // 2) Byg tasks-listen ud fra selectedTasks
+    scenario.tasks = selectedTasks.map((t, index) => {
+        const task = new Task();
+        task.idT = index + 1;
+        task.taskId = t.taskId;
+        task.taskTitle = t.taskTitle;
+        task.taskDescription = t.taskDescription;
+        task.mapType = t.mapType;
+        task.mapRadiusInMeters = t.mapRadiusInMeters;
+        return task;
+    });
+
+    // 3) Lav et “rent” objekt i den struktur du ønsker
+    const exportScenario = {
+        scenarioId: scenario.scenarioId,
+        scenarioTitle: scenario.scenarioTitle,
+        scenarioCreatedBy: scenario.scenarioCreatedBy,
+        scenarioCreatedTime: scenario.scenarioCreatedTime.toISOString(),
+        scenarioIsActive: scenario.scenarioIsActive,
+        tasks: scenario.tasks.map(t => ({
+            idT: t.idT,
+            taskId: t.taskId,
+            taskTitle: t.taskTitle,
+            taskDescription: t.taskDescription,
+            mapType: t.mapType,
+            mapRadiusInMeters: t.mapRadiusInMeters
+        }))
+    };
+    switchView('dashboard');
+    saveScenarioToStorage(exportScenario);
+    const jsonString = JSON.stringify(exportScenario, null, 2);
+    console.log("Eksporteret scenarie JSON:", jsonString);
+    
+   /*
+    // 4) Download som .json-fil
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = (scenario.scenarioId || "scenario") + ".json"; // fx S1.json
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+   */
+});

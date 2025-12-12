@@ -1,1 +1,17 @@
 /*LAYOUT*/
+#header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end; /* Aligns text to bottom near the line */
+  margin-bottom: 5px;
+  h1{
+    margin: 2% 0 0 5%;
+  }
+}
+.thick-separator {
+  border: none;
+  height: 20px; /* Thickness of the line */
+  background-color: var(--secondary-color); /* Matches title color */
+  margin: 0 auto;
+  width: 90%;
+}

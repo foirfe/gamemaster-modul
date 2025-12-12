@@ -7,6 +7,41 @@
     "mapRadiusInMeters": 100
   },
   {
+    "taskId": "T21",
+    "taskTitle": "Sikringspost Syd",
+    "taskDescription": "Etabler en sikringspost og rapportér observeret aktivitet mod syd.",
+    "mapType": "zone",
+    "mapRadiusInMeters": 150
+  },
+  {
+    "taskId": "T22",
+    "taskTitle": "Førstehjælpsstation",
+    "taskDescription": "Opsæt en midlertidig førstehjælpsstation og marker området på kortet.",
+    "mapType": "punkt",
+    "mapRadiusInMeters": 20
+  },
+  {
+    "taskId": "T23",
+    "taskTitle": "Observation af rute Bravo",
+    "taskDescription": "Overvåg bevægelse langs rute Bravo og noter køretøjstyper.",
+    "mapType": "zone",
+    "mapRadiusInMeters": 120
+  },
+  {
+    "taskId": "T24",
+    "taskTitle": "Kommunikationscheck",
+    "taskDescription": "Test radioforbindelser mellem alle enheder i området.",
+    "mapType": "punkt",
+    "mapRadiusInMeters": 10
+  },
+  {
+    "taskId": "T25",
+    "taskTitle": "Søg og find markering",
+    "taskDescription": "Gennemfør en søgeopgave i området og lokaliser udlagte markeringer.",
+    "mapType": "zone",
+    "mapRadiusInMeters": 200
+  },
+  {
     "taskId": "T8",
     "taskTitle": "Observation nord",
     "taskDescription": "Observation af aktivitet i området mod nord",
