@@ -12,6 +12,8 @@ const btnReset = document.getElementById("btn-filter-reset");
 let manualLocationOverride = false;
 let manualLatLng = null;
 let lastGpsLatLng = null; 
+let hasCenteredOnce = false;
+
 
 if (radiusInput && radiusValue) {
     radiusValue.textContent = `${radiusInput.value} m`;
@@ -82,7 +84,8 @@ function switchView(viewName) {
         dashboardView.classList.add('view-hidden');
         dashboardView.classList.remove('view-active');
         editorView.classList.remove('view-hidden');
-        editorView.classList.add('view-active');
+        editorView.classList.add('view-active')
+            ;
     } else {
         // Tilbage til dashboard
         editorView.classList.add('view-hidden');
@@ -101,20 +104,21 @@ window.addEventListener("userLocationMoved", (e) => {
     // fx filterTasksNear(lat, lng, 5000);
 });
 
-// 2. Event Listeners
 document.getElementById('btn-create-new').addEventListener('click', async () => {
+    hasCenteredOnce = false;       // ✅ gør at den centrér første gang igen
+    manualLocationOverride = false; // (valgfrit) start “følg GPS”
+    manualLatLng = null;
+
     switchView('editor');
     initMap('map-container');
     resetEditor();
 
-    //geolocation
     navigator.geolocation.watchPosition(onPositionUpdate, console.error, {
         enableHighAccuracy: true,
         maximumAge: 0,
         timeout: 15000
     });
 
-    // hent tasks og tegn liste
     await loadTasks();
     renderTaskList();
 });
@@ -351,28 +355,28 @@ export async function editScenario(id) {
 
 
 function onPositionUpdate(position) {
-
     const lat = position.coords.latitude;
     const lng = position.coords.longitude;
     const accuracy = position.coords.accuracy;
 
-    //gemmer seneste gps
     lastGpsLatLng = { lat, lng };
 
-
-    // Hvis brugeren har flyttet manuelt, så opdatér IKKE markøren til GPS-position
     if (!manualLocationOverride) {
-        upsertUserLocation(lat, lng, accuracy);
-        centerMapOnLocation(lat, lng, 15);
+        upsertUserLocation(lat, lng, null);
+
+        // Centrer kun første gang, så kortet ikke "snapper tilbage"
+        if (!hasCenteredOnce) {
+            centerMapOnLocation(lat, lng, 15);
+            hasCenteredOnce = true;
+        }
+
         currentFilterLatLng = { lat, lng };
     } else {
-        // Hold markøren på den manuelle lokation (men behold accuracy hvis du vil)
         if (manualLatLng) {
             upsertUserLocation(manualLatLng.lat, manualLatLng.lng, accuracy);
         }
     }
 }
-
 
 //raidus på task
 

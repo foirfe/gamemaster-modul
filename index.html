@@ -31,6 +31,11 @@
         <button id="btn-back">Tilbage til oversigt</button>
         <div class="editor-layout">
             <aside id="task-sidebar">
+                <button id="btn-import">
+                    Importér opgaver<span class="material-symbols-outlined">
+                        upload
+                    </span>
+                </button>
                 <label for="scenario-name">Scenarie</label>
                 <input type="text" id="scenario-name" placeholder="Skriv scenarie navn">
                 <div class="scenario-desc-container">
@@ -44,23 +49,21 @@
                     <option value="vand">Vand</option>
                 </select>
 
-                <button id="btn-filter-nearby">Vis opgaver i nærheden</button>
                 <label for="nearby-radius">Søgeradius (Meter)</label>
                 <input id="nearby-radius" type="range" min="250" max="20000" step="250" value="5000">
                 <div id="nearby-radius-value">5000 m</div>
-       
 
+
+                <button id="btn-filter-nearby">Vis opgaver i nærheden</button>
 
                 <button id="btn-location-reset">Nulstil placering (GPS)</button>
-                <button id="btn-filter-reset">Vis alle opgaver</button>
 
 
-                <button id="btn-import">
-                    Importér opgaver<span class="material-symbols-outlined">
-                        upload
-                    </span>
-                </button>
+
+
+
                 <h3>Tilgængelige opgaver</h3>
+                <button id="btn-filter-reset">Vis alle opgaver</button>
                 <div id="div-task-list" class="scrollable-list">
                     <ul id="task-list" class="task-list"></ul>
 
