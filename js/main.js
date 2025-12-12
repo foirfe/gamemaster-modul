@@ -1,7 +1,18 @@
 //Main // test
 import { initMap } from './map-manager.js';
 import { Scenario, Task, Option } from './models.js';
-import { downloadJSON, saveScenarioToStorage } from './data-manager.js';
+import { downloadJSON, saveScenarioToStorage,getScenariosFromStorage } from './data-manager.js';
+import { renderDashboard } from './ui-manager.js';
+
+
+
+function updateDashboardView() {
+    const scenarios = getScenariosFromStorage();
+    renderDashboard(scenarios);
+}
+// Kaldes når siden loader
+updateDashboardView();
+
 
 //Navigation
 const dashboardView = document.getElementById('view-dashboard');
@@ -18,6 +29,7 @@ function switchView(viewName) {
         editorView.classList.remove('view-active');
         dashboardView.classList.remove('view-hidden');
         dashboardView.classList.add('view-active');
+        updateDashboardView();
     }
 }
 // 2. Event Listeners
@@ -208,6 +220,7 @@ document.getElementById('btn-save').addEventListener('click', () => {
     };
     switchView('dashboard');
     saveScenarioToStorage(exportScenario);
+    updateDashboardView();
     const jsonString = JSON.stringify(exportScenario, null, 2);
     console.log("Eksporteret scenarie JSON:", jsonString);
     
