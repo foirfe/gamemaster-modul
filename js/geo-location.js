@@ -37,6 +37,8 @@ let _pollIntervalId = null;
 let _userConsented = false;
 let _promptInProgress = false;
 let _storedConsent = 'unknown';
+let _lastLogTs = 0;
+let _lastLogCoords = null;
 
 // Load persisted consent (if any) so we know prior user choice.
 _storedConsent = _loadConsentState();
@@ -68,10 +70,16 @@ function _saveConsentState(state) {
 function _onPositionSuccess(position) {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
-    console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+    // Throttle logging: only log if coords change or >3s since last log
+    const now = Date.now();
+    const coordsChanged = !_lastLogCoords || _lastLogCoords.lat !== latitude || _lastLogCoords.lng !== longitude;
+    if (coordsChanged || now - _lastLogTs > 3000) {
+        console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+        _lastLogTs = now;
+        _lastLogCoords = { lat: latitude, lng: longitude };
+    }
     _userConsented = true;
     _saveConsentState('granted');
-    if (typeof showPosition === 'function') showPosition(position);
 }
 
 function _onPositionError(error) {
@@ -90,7 +98,7 @@ function _onPositionError(error) {
 // Responsible for safely requesting permission (when needed) and starting
 // a periodic polling loop. Uses the Permissions API to avoid repeated
 // prompts when possible and ensures only one permission prompt is active.
-function startLocationPolling(intervalMs = 2000) {
+function startLocationPolling(intervalMs = 3000) {
     if (!_userConsented) {
         console.warn('Cannot start polling: user has not consented to share location.');
         return;
