@@ -1,7 +1,19 @@
 //Main // test
-import { initMap } from './map-manager.js';
+import { initMap, upsertTaskCircle, removeTaskCircle } from './map-manager.js';
 import { Scenario, Task, Option } from './models.js';
-import { downloadJSON, saveScenarioToStorage } from './data-manager.js';
+import { downloadJSON, saveScenarioToStorage,getScenariosFromStorage } from './data-manager.js';
+import { renderDashboard } from './ui-manager.js';
+
+
+
+
+function updateDashboardView() {
+    const scenarios = getScenariosFromStorage();
+    renderDashboard(scenarios);
+}
+// Kaldes når siden loader
+updateDashboardView();
+
 
 //Navigation
 const dashboardView = document.getElementById('view-dashboard');
@@ -18,6 +30,7 @@ function switchView(viewName) {
         editorView.classList.remove('view-active');
         dashboardView.classList.remove('view-hidden');
         dashboardView.classList.add('view-active');
+        updateDashboardView();
     }
 }
 // 2. Event Listeners
@@ -107,28 +120,77 @@ function renderTaskList() {
         li.classList.add('task-item');
 
         li.innerHTML = `
+    <div class="task-item-content">
+        <div>
             <div class="task-item-title">${team1Task.ID} - ${team1Task.Titel}</div>
             <div class="task-item-desc">${team1Task.Beskrivelse}</div>
-        `;
+        </div>
+        <div class="task-order-badge"></div>
+    </div>
+`;
+
+        // gem ID på elementet
+        li.dataset.taskId = team1Task.ID;
+
 
         const isSelected = selectedTasks.some(t => t.ID === team1Task.ID);
         if (isSelected) li.classList.add('task-item-selected');
 
         li.addEventListener('click', () => {
-            const index = selectedTasks.findIndex(t => t.ID === team1Task.ID);
+            const existingIndex = selectedTasks.findIndex(t => t.ID === team1Task.ID);
 
-            if (index === -1) {
+            if (existingIndex === -1) {
+                // Ikke valgt endnu → tilføj
                 selectedTasks.push(team1Task);
-                li.classList.add('task-item-selected');
             } else {
-                selectedTasks.splice(index, 1);
-                li.classList.remove('task-item-selected');
+                // Allerede valgt → fjern
+                selectedTasks.splice(existingIndex, 1);
+                // Fjern cirkel fra kortet for den task
+                removeTaskCircle(team1Task.ID);
             }
+
+            // Efter vi har opdateret selectedTasks, opdaterer vi både badges og cirkler
+            updateTaskSelectionUIAndMap();
         });
 
         listEl.appendChild(li);
+
     });
 }
+
+        function updateTaskSelectionUIAndMap() {
+            // 1) Nulstil alle badges + selected-styles
+            const listEl = document.getElementById('task-list');
+            const allLis = listEl.querySelectorAll('.task-item');
+
+            allLis.forEach(li => {
+                li.classList.remove('task-item-selected');
+                const badge = li.querySelector('.task-order-badge');
+                if (badge) badge.textContent = "";
+            });
+
+            // 2) Gå de valgte tasks igennem i rækkefølge og giv dem nummer + cirkel
+            selectedTasks.forEach((t, index) => {
+                const orderNumber = index + 1;
+
+                // Find det li-element, der matcher tasken
+                const li = listEl.querySelector(`li[data-task-id="${t.ID}"]`);
+                if (li) {
+                    li.classList.add('task-item-selected');
+                    const badge = li.querySelector('.task-order-badge');
+                    if (badge) badge.textContent = orderNumber;
+                }
+
+                // Tegn/Opdatér cirkel på kortet
+                if (Array.isArray(t.Lokation) && t.Lokation.length >= 2) {
+                    const lat = Number(t.Lokation[0]);
+                    const lng = Number(t.Lokation[1]);
+                    const radius = Number(t.Radius ?? 0);
+
+                    upsertTaskCircle(t.ID, lat, lng, radius, orderNumber);
+                }
+            });
+        }
 
 const scenariosData = localStorage.getItem('gamemaster_scenarios');
 
@@ -208,6 +270,7 @@ document.getElementById('btn-save').addEventListener('click', () => {
     };
     switchView('dashboard');
     saveScenarioToStorage(exportScenario);
+    updateDashboardView();
     const jsonString = JSON.stringify(exportScenario, null, 2);
     console.log("Eksporteret scenarie JSON:", jsonString);
     

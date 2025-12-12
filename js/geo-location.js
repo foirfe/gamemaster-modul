@@ -247,7 +247,7 @@ function createConsentBanner() {
     banner.style.left = '12px';
     banner.style.bottom = '12px';
     banner.style.padding = '12px';
-    banner.style.background = 'rgba(0,0,0,0.8)';
+    banner.style.background = '#8D1B3D';
     banner.style.color = '#fff';
     banner.style.borderRadius = '6px';
     banner.style.zIndex = 9999;
@@ -256,11 +256,11 @@ function createConsentBanner() {
 
     const msg = document.createElement('div');
     msg.id = 'geo-consent-msg';
-    msg.textContent = 'This app needs your location to work properly. Allow access?';
+    msg.textContent = 'Denne app fungerer bedst med adgang til din placering. Tillad adgang?';
     msg.style.marginBottom = '8px';
 
     const btnAllow = document.createElement('button');
-    btnAllow.textContent = 'Allow location';
+    btnAllow.textContent = 'Tillad placering';
     btnAllow.style.marginRight = '8px';
     // When the user explicitly clicks Allow, hide the banner immediately
     // then request the position. This avoids the banner lingering if
@@ -287,11 +287,11 @@ function createConsentBanner() {
     };
 
     const btnDecline = document.createElement('button');
-    btnDecline.textContent = "Don't allow";
+    btnDecline.textContent = "Afvis placering";
     btnDecline.onclick = () => {
         _userConsented = false;
         stopLocationPolling();
-        alert('You declined location access. The app will not function properly without it.');
+        alert('Du har afvist adgang til placering. Appen fungerer bedst med adgang til placering.');
         _saveConsentState('denied');
         showConsentBanner(true);
     };
@@ -312,8 +312,8 @@ function showConsentBanner(showRetry = false) {
     const msg = document.getElementById('geo-consent-msg');
     if (msg) {
         msg.textContent = showRetry
-            ? 'Location access is required. Please enable it in your browser settings or try again.'
-            : 'This app needs your location to work properly. Allow access?';
+            ? 'Adgang til placering blev tidligere afvist. For at appen kan fungere mere optimalt, skal du tillade adgang til din placering.'
+            : 'Denne app fungerer bedst med adgang til din placering. Tillad adgang?';
     }
 }
 
