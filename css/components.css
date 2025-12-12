@@ -11,6 +11,8 @@ button {
     transition: all 0.1s ease;
     &:hover{
         cursor: pointer;
+        background-color: var(--primary-color);
+        color: #fff;
     }
     &:active{
         transform: translateY(2px);
@@ -21,12 +23,92 @@ button {
     margin: 2% 5% 0 0;
     padding: 1% 2.5%;
 }
-#view-editor{
-    #btn-back{
-        position: absolute;
-        z-index: 50;
+.scenario-list-and-btn{
+display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 90%;
+    margin: 0 auto;
+    padding-bottom: 50px;
+}
+.scenario-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 20px;
+    width: 100%;
+    padding: 0;
+    margin: 2% 0;
+    box-sizing: border-box;
+}
+.scenario-item {
+    background-color: var(--background-color);
+    border: 1px solid var(--primary-color);
+    padding: 25px;
+    list-style: none;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.scenario-item-title {
+    color: var(--primary-color);
+    font-size: 2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 1.1;
+    margin-bottom: 2%;
+}
+
+/* Beskrivelsen */
+.scenario-item-desc {
+    color: #000;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* Knapper inde i kortet */
+.scenario-item button {
+    background-color: transparent;
+    border: 2px solid #35534B;
+    color: #35534B;
+    padding: 8px 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-right: 10px;
+    font-size: 12px;
+    width: auto; /* Så de ikke fylder hele bredden som i sidebar */
+    display: inline-block;
+}
+
+/* --- RESPONSIVITET (Her sker magien) --- */
+/* Tablet (f.eks. iPad) - Skift til 2 kolonner */
+@media (max-width: 1024px) {
+    .scenario-list {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
+/* Mobil (f.eks. iPhone) - Skift til 1 kolonne */
+@media (max-width: 600px) {
+    .scenario-list {
+        grid-template-columns: 1fr;
+    }
+    /* Gør teksten lidt mindre på mobil så det ikke fylder for meget */
+    .scenario-item-title {
+        font-size: 24px;
+    }
+}
+    #btn-back{
+        position: absolute;
+        left: 2%;
+        top: 2%;
+        z-index: 101;
+        padding: 0.5% 2.5%;
+    }
+    #download-btn{
+        padding: 1% 2.5%;
+    }
+    
 #map-container {
     width: 100%;
     height: 100vh; /* 100% af Viewport Height - altså hele skærmen */
@@ -37,8 +119,8 @@ button {
 
 #task-sidebar {
     position: absolute;      
-    top: 10px;               
-    left: 10px;           
+    top: 7%;               
+    left: 2%;           
     width: 30%;             
     height: 80%;            
     background: #3F5B58;     

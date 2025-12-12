@@ -40,8 +40,14 @@ export function renderDashboard(scenarios) {
         const descDiv = document.createElement('div');
         descDiv.className = 'scenario-item-desc';
         descDiv.textContent = `Miljø: ${scenario.scenarioEnvironment || 'Ikke angivet'} | Oprettet: ${dateStr} | Opgaver: ${scenario.tasks ? scenario.tasks.length : 0}`;
+        const editBtn = document.createElement('button');
+        editBtn.textContent = `Redigere`;
+        const deleteScenarioBtn = document.createElement('button');
+        deleteScenarioBtn.textContent = `Slet`;
         li.appendChild(titleDiv);
         li.appendChild(descDiv);
+        li.appendChild(editBtn);
+        li.appendChild(deleteScenarioBtn);
         li.addEventListener('click', () => {
             console.log("Klikket på scenarie:", scenario.scenarioTitle);
         });
