@@ -5,7 +5,7 @@
     --background-color: #E9EBEB;
     --military-green: #647851;
     --navy-blue: #1D2C50;
-    --font-family: 'Verdana Pro', Geneva, Tahoma, sans-serif;
+    --font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 html, body {
     margin: 0;
