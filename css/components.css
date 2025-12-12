@@ -142,13 +142,38 @@ button {
     box-shadow: 0 0 0 2px var(--secondary-color); /* “glow” omkring kortet */
 }
 
-    /* Lille overlay-tjekmark øverst til højre (valgfrit, men ser nice ud) */
-    .task-item-selected::after {
-        content: "✓";
-        position: absolute;
-        top: 4px;
-        right: 6px;
-        font-size: 0.9rem;
-        font-weight: bold;
-        color: #2c5e57;
-    }
+
+.task-order-label {
+    font-weight: bold;
+    color: #000;
+    background: transparent;
+    border: none;
+    text-shadow: 0 0 3px #fff;
+}
+
+.task-item-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-order-badge {
+    min-width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 999px;
+    border: 2px solid #2c3e3f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.task-item-selected .task-order-badge {
+    background: #2c3e3f;
+    color: #fff;
+}
+
+.leaflet-task-icon {
+    background: transparent !important;
+    border: none !important;
+}
