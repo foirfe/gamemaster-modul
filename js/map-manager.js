@@ -34,7 +34,8 @@ export function addMarkerToMap(lat, lng, title) {
         .openPopup();
 }
 
-// NYT: tegn / opdatér cirkel med nummer
+// NYT: tegn / opdatér task som "badge-marker" (samme design som i listen)
+// + valgfri radius-cirkel (hvis radiusMeters > 0)
 export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber) {
     if (!map) return;
 
@@ -44,23 +45,30 @@ export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber) {
         map.removeLayer(existing);
     }
 
-    const radius = radiusMeters > 0 ? radiusMeters : 50;
-
-    const circle = L.circle([lat, lng], {
-        radius: radius
-    }).addTo(map);
-
-    // Nummer i midten
-    circle.bindTooltip(orderNumber.toString(), {
-        permanent: true,
-        direction: 'center',
-        className: 'task-order-label'
+    // Marker som badge med samme CSS-klasse som i sidebar
+    const icon = L.divIcon({
+        className: 'leaflet-task-icon',
+        html: `<div class="task-order-badge">${orderNumber}</div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
     });
 
-    taskLayers.set(taskId, circle);
+    const marker = L.marker([lat, lng], { icon });
+
+    // Lav en layerGroup så vi kan have både marker + radius-cirkel (hvis ønsket)
+    const layers = [marker];
+
+    // Hvis det er en zone (radius > 0), tegner vi cirklen også
+    if (radiusMeters && Number(radiusMeters) > 0) {
+        const zoneCircle = L.circle([lat, lng], { radius: Number(radiusMeters) });
+        layers.push(zoneCircle);
+    }
+
+    const group = L.layerGroup(layers).addTo(map);
+    taskLayers.set(taskId, group);
 }
 
-// NYT: fjern cirkel når task fravælges
+// NYT: fjern marker + evt. radius-cirkel når task fravælges
 export function removeTaskCircle(taskId) {
     if (!map) return;
 
@@ -70,4 +78,3 @@ export function removeTaskCircle(taskId) {
         taskLayers.delete(taskId);
     }
 }
-
