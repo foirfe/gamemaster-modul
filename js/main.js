@@ -98,43 +98,32 @@ async function loadTasks() {
 // Tegn listen i sidebar
 function renderTaskList() {
     const listEl = document.getElementById('task-list');
-    if (!listEl) {
-        console.warn('Fandt ikke #task-list');
-        return;
-    }
+    if (!listEl) return;
 
     listEl.innerHTML = '';
 
-    allTasks.forEach(task => {
+    allTasks.forEach(team1Task => {
         const li = document.createElement('li');
         li.classList.add('task-item');
 
         li.innerHTML = `
-            <div class="task-item-title">${task.taskId} - ${task.taskTitle}</div>
-            <div class="task-item-desc">${task.taskDescription}</div>
+            <div class="task-item-title">${team1Task.ID} - ${team1Task.Titel}</div>
+            <div class="task-item-desc">${team1Task.Beskrivelse}</div>
         `;
 
-        // Er denne task allerede markeret?
-        const isSelected = selectedTasks.some(t => t.taskId === task.taskId);
-        if (isSelected) {
-            li.classList.add('task-item-selected');
-        }
+        const isSelected = selectedTasks.some(t => t.ID === team1Task.ID);
+        if (isSelected) li.classList.add('task-item-selected');
 
-        // Klik-håndtering: toggle markering + opdater selectedTasks
         li.addEventListener('click', () => {
-            const index = selectedTasks.findIndex(t => t.taskId === task.taskId);
+            const index = selectedTasks.findIndex(t => t.ID === team1Task.ID);
 
             if (index === -1) {
-                // Ikke i listen endnu → tilføj
-                selectedTasks.push(task);
+                selectedTasks.push(team1Task);
                 li.classList.add('task-item-selected');
             } else {
-                // Allerede i listen → fjern
                 selectedTasks.splice(index, 1);
                 li.classList.remove('task-item-selected');
             }
-
-            console.log('Valgte opgaver:', selectedTasks);
         });
 
         listEl.appendChild(li);
@@ -147,7 +136,37 @@ const scenariosData = localStorage.getItem('gamemaster_scenarios');
 console.log(scenariosData);
  document.getElementById('download-btn').addEventListener('click', () => {
     downloadJSON("Scenarios.json", localStorage.getItem('gamemaster_scenarios'));
-    })
+ })
+
+//render tasknames
+function mapTeam1TaskToOurTask(team1Task, index) {
+    const task = new Task();
+
+    task.idT = index + 1;
+    task.orderNumber = index + 1;
+
+    task.taskId = `T${team1Task.ID}`;
+    task.taskTitle = team1Task.Titel ?? "";
+    task.taskDescription = team1Task.Beskrivelse ?? "";
+
+    // Aktiveringsbetingelse: "Zone" -> zone, "Lokalitet" -> punkt
+    const act = (team1Task.Aktiveringsbetingelse ?? "").toLowerCase();
+    task.mapType = act === "zone" ? "zone" : "punkt";
+
+    task.mapRadiusInMeters = Number(team1Task.Radius ?? 0);
+
+    // Lokation: [lat, lng]
+    if (Array.isArray(team1Task.Lokation) && team1Task.Lokation.length >= 2) {
+        task.mapLat = Number(team1Task.Lokation[0]);
+        task.mapLng = Number(team1Task.Lokation[1]);
+    }
+
+    task.mapLabel = `OP${index + 1}`;
+    task.isActive = false;
+
+    return task;
+}
+
 
 //Ny json fil
 document.getElementById('btn-save').addEventListener('click', () => {
@@ -161,21 +180,15 @@ document.getElementById('btn-save').addEventListener('click', () => {
     scenario.scenarioIsActive = true;
 
     // 2) Byg tasks-listen ud fra selectedTasks
-    scenario.tasks = selectedTasks.map((t, index) => {
-        const task = new Task();
-        task.idT = index + 1;
-        task.taskId = t.taskId;
-        task.taskTitle = t.taskTitle;
-        task.taskDescription = t.taskDescription;
-        task.mapType = t.mapType;
-        task.mapRadiusInMeters = t.mapRadiusInMeters;
-        return task;
-    });
+    scenario.tasks = selectedTasks.map((t, index) => mapTeam1TaskToOurTask(t, index));
+
 
     // 3) Lav et “rent” objekt i den struktur du ønsker
     const exportScenario = {
         scenarioId: scenario.scenarioId,
         scenarioTitle: scenario.scenarioTitle,
+        scenarioDescription: scenario.scenarioDescription || "",
+        scenarioEnvironment: scenario.scenarioEnvironment,
         scenarioCreatedBy: scenario.scenarioCreatedBy,
         scenarioCreatedTime: scenario.scenarioCreatedTime.toISOString(),
         scenarioIsActive: scenario.scenarioIsActive,
@@ -184,8 +197,13 @@ document.getElementById('btn-save').addEventListener('click', () => {
             taskId: t.taskId,
             taskTitle: t.taskTitle,
             taskDescription: t.taskDescription,
+            orderNumber: t.orderNumber,
             mapType: t.mapType,
-            mapRadiusInMeters: t.mapRadiusInMeters
+            mapRadiusInMeters: t.mapRadiusInMeters,
+            mapLabel: t.mapLabel,
+            mapLat: t.mapLat,
+            mapLng: t.mapLng,
+            isActive: t.isActive
         }))
     };
     switchView('dashboard');

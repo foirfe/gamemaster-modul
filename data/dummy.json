@@ -1,51 +1,72 @@
 [
   {
-    "taskId": "T15",
-    "taskTitle": "Patrulje i nat",
-    "taskDescription": "Se efter i området for at se, om alt er ok",
-    "mapType": "zone",
-    "mapRadiusInMeters": 100
+    "ID": 1,
+    "Titel": "Natpatrulje i skovområdet",
+    "Beskrivelse": "Patruljér gennem skovstykket og kontroller, om der er tegn på aktivitet.",
+    "Type": "Land",
+    "Lokation": [ 56.1543, 9.5321 ],
+    "Radius": 100,
+    "Valgmuligheder": [ "Patruljen er gennemført", "Området virker utrygt - gentag patrulje" ],
+    "Aktiveringsbetingelse": "Zone"
   },
   {
-    "taskId": "T21",
-    "taskTitle": "Sikringspost Syd",
-    "taskDescription": "Etabler en sikringspost og rapportér observeret aktivitet mod syd.",
-    "mapType": "zone",
-    "mapRadiusInMeters": 150
+    "ID": 2,
+    "Titel": "Sikringspost sydlig vej",
+    "Beskrivelse": "Etabler en sikringspost ved den sydlige adgangsvej og observer bevægelse.",
+    "Type": "Land",
+    "Lokation": [ 55.9852, 8.1257 ],
+    "Radius": 150,
+    "Valgmuligheder": [ "Post etableret og bemandet", "Omplacér posten til bedre dækning" ],
+    "Aktiveringsbetingelse": "Zone"
   },
   {
-    "taskId": "T22",
-    "taskTitle": "Førstehjælpsstation",
-    "taskDescription": "Opsæt en midlertidig førstehjælpsstation og marker området på kortet.",
-    "mapType": "punkt",
-    "mapRadiusInMeters": 20
+    "ID": 3,
+    "Titel": "Midlertidig førstehjælpszone",
+    "Beskrivelse": "Opsæt en midlertidig førstehjælpsstation til støtte for enheden.",
+    "Type": "Land",
+    "Lokation": [ 56.2034, 10.1876 ],
+    "Radius": 20,
+    "Valgmuligheder": [ "Station klar til brug", "Mangler materiel - rapportér" ],
+    "Aktiveringsbetingelse": "Lokalitet"
   },
   {
-    "taskId": "T23",
-    "taskTitle": "Observation af rute Bravo",
-    "taskDescription": "Overvåg bevægelse langs rute Bravo og noter køretøjstyper.",
-    "mapType": "zone",
-    "mapRadiusInMeters": 120
+    "ID": 4,
+    "Titel": "Observation af rute Bravo",
+    "Beskrivelse": "Overvåg rute Bravo og notér antal køretøjer og retning.",
+    "Type": "Land",
+    "Lokation": [ 55.7201, 9.1043 ],
+    "Radius": 120,
+    "Valgmuligheder": [ "Begrænset aktivitet", "Høj aktivitet - videregiv melding" ],
+    "Aktiveringsbetingelse": "Lokalitet"
   },
   {
-    "taskId": "T24",
-    "taskTitle": "Kommunikationscheck",
-    "taskDescription": "Test radioforbindelser mellem alle enheder i området.",
-    "mapType": "punkt",
-    "mapRadiusInMeters": 10
+    "ID": 5,
+    "Titel": "Kommunikationscheck i området",
+    "Beskrivelse": "Test radioforbindelser mellem alle delinger i området.",
+    "Type": "Land",
+    "Lokation": [ 57.0480, 9.9189 ],
+    "Radius": 10,
+    "Valgmuligheder": [ "Alle enheder høres klart", "Nogle enheder ude af rækkevidde" ],
+    "Aktiveringsbetingelse": "Lokalitet"
   },
   {
-    "taskId": "T25",
-    "taskTitle": "Søg og find markering",
-    "taskDescription": "Gennemfør en søgeopgave i området og lokaliser udlagte markeringer.",
-    "mapType": "zone",
-    "mapRadiusInMeters": 200
+    "ID": 6,
+    "Titel": "Søgning efter markeringer",
+    "Beskrivelse": "Gennemfør en systematisk søgning efter udlagte markeringer i øvelsesområdet.",
+    "Type": "Land",
+    "Lokation": [ 55.3305, 10.4231 ],
+    "Radius": 200,
+    "Valgmuligheder": [ "Alle markeringer fundet", "Flere markeringer mangler - fortsæt søgning" ],
+    "Aktiveringsbetingelse": "Lokalitet"
   },
   {
-    "taskId": "T8",
-    "taskTitle": "Observation nord",
-    "taskDescription": "Observation af aktivitet i området mod nord",
-    "mapType": "punkt",
-    "mapRadiusInMeters": 20
+    "ID": 7,
+    "Titel": "Observation mod nord",
+    "Beskrivelse": "Observér terrænet mod nord og rapportér mistænkelig aktivitet.",
+    "Type": "Land",
+    "Lokation": [ 56.4706, 8.4523 ],
+    "Radius": 20,
+    "Valgmuligheder": [ "Ingen aktivitet observeret", "Mistænkelig bevægelse observeret" ],
+    "Aktiveringsbetingelse": "Lokalitet"
   }
 ]
