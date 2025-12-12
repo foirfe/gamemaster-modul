@@ -22,6 +22,7 @@
 // Configuration / Defaults
 // -----------------------------
 // Default options passed to `getCurrentPosition`.
+const CONSENT_STORAGE_KEY = 'geo-consent-state'; // persisted consent flag
 const options = {
     enableHighAccuracy: false,
     timeout: 5000,
@@ -35,6 +36,30 @@ const options = {
 let _pollIntervalId = null;
 let _userConsented = false;
 let _promptInProgress = false;
+let _storedConsent = 'unknown';
+
+// Load persisted consent (if any) so we know prior user choice.
+_storedConsent = _loadConsentState();
+if (_storedConsent === 'granted') {
+    _userConsented = true;
+}
+
+function _loadConsentState() {
+    try {
+        return localStorage.getItem(CONSENT_STORAGE_KEY) || 'unknown';
+    } catch (e) {
+        return 'unknown';
+    }
+}
+
+function _saveConsentState(state) {
+    _storedConsent = state;
+    try {
+        localStorage.setItem(CONSENT_STORAGE_KEY, state);
+    } catch (e) {
+        // ignore storage failures (private mode, quota, etc.)
+    }
+}
 
 // -----------------------------
 // Position callbacks
@@ -44,6 +69,8 @@ function _onPositionSuccess(position) {
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
     console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+    _userConsented = true;
+    _saveConsentState('granted');
     if (typeof showPosition === 'function') showPosition(position);
 }
 
@@ -201,6 +228,7 @@ function requestLocationPermission() {
 function _notifyDenied() {
     // Alert the user and ensure there's a persistent UI to retry enabling location
     alert('Location access denied. The app will not function properly without location access.');
+    _saveConsentState('denied');
     showConsentBanner(true); // show banner with retry button
 }
 
@@ -264,6 +292,7 @@ function createConsentBanner() {
         _userConsented = false;
         stopLocationPolling();
         alert('You declined location access. The app will not function properly without it.');
+        _saveConsentState('denied');
         showConsentBanner(true);
     };
 
@@ -326,6 +355,7 @@ window.startLocationPolling = startLocationPolling;
 window.stopLocationPolling = stopLocationPolling;
 window.requestLocationPermission = requestLocationPermission;
 window.showConsentBanner = showConsentBanner;
+window.getGeoConsentState = () => _storedConsent;
 
 // -----------------------------
 // Initialization & DOM wiring
