@@ -36,14 +36,38 @@ export function renderDashboard(scenarios) {
         const titleDiv = document.createElement('div');
         titleDiv.className = 'scenario-item-title';
         titleDiv.textContent = scenario.scenarioTitle;
-        // 2. Beskrivelse sektion
         const descDiv = document.createElement('div');
-        descDiv.className = 'scenario-item-desc';
-        descDiv.textContent = `Miljø: ${scenario.scenarioEnvironment || 'Ikke angivet'} | Oprettet: ${dateStr} | Opgaver: ${scenario.tasks ? scenario.tasks.length : 0}`;
+        descDiv.className = 'scenario-desc';
+        descDiv.textContent = scenario.scenarioDescription;
+        // 2. Beskrivelse sektion
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'scenario-item-desc';
+        infoDiv.textContent = `Miljø: ${scenario.scenarioEnvironment || 'Ikke angivet'} | Oprettet: ${dateStr} | Opgaver: ${scenario.tasks ? scenario.tasks.length : 0}`;
+       // REDIGER KNAP
         const editBtn = document.createElement('button');
         editBtn.textContent = `Redigere`;
+        editBtn.onclick = (e) => {
+            e.stopPropagation(); // Undgå at klikke på selve LI elementet også
+            // Kald funktionen fra main.js
+            if (typeof window.editScenario === 'function') {
+                 window.editScenario(scenario.scenarioId);
+            } else {
+                 console.error("editScenario funktion ikke fundet");
+            }
+        };
+
+        // SLET KNAP
         const deleteScenarioBtn = document.createElement('button');
         deleteScenarioBtn.textContent = `Slet`;
+        deleteScenarioBtn.onclick = (e) => {
+            e.stopPropagation(); // Stop klikket fra at åbne scenariet
+            // Kald funktionen vi lavede i main.js
+            if (typeof window.handleDeleteScenario === 'function') {
+                window.handleDeleteScenario(scenario.scenarioId);
+            } else {
+                console.error("handleDeleteScenario funktion ikke fundet.");
+            }
+        };
         li.appendChild(titleDiv);
         li.appendChild(descDiv);
         li.appendChild(editBtn);

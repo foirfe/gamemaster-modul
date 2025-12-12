@@ -1,19 +1,30 @@
 //Main // test
 import { initMap, upsertTaskCircle, removeTaskCircle } from './map-manager.js';
 import { Scenario, Task, Option } from './models.js';
-import { downloadJSON, saveScenarioToStorage,getScenariosFromStorage } from './data-manager.js';
+import { downloadJSON, saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
 import { renderDashboard } from './ui-manager.js';
-
-
-
+// Gør funktioner tilgængelige globalt så ui-manager kan kalde dem
+window.editScenario = editScenario;
+window.handleDeleteScenario = (id) => {
+    if (confirm('Er du sikker på, at du vil slette dette scenarie?')) {
+        const success = deleteScenario(id);
+        if (success) {
+            updateDashboardView();
+        }
+    }
+};
 
 function updateDashboardView() {
-    const scenarios = getScenariosFromStorage();
-    renderDashboard(scenarios);
+    const allScenarios = getScenariosFromStorage();
+    const activeScenarios = allScenarios.filter(s => s.scenarioIsActive !== false);
+    renderDashboard(activeScenarios);
 }
 // Kaldes når siden loader
 updateDashboardView();
-
+// Globale variabler til editoren
+let currentScenario = new Scenario(); 
+let selectedTasks = []; 
+let allTasks = [];
 
 //Navigation
 const dashboardView = document.getElementById('view-dashboard');
@@ -37,6 +48,7 @@ function switchView(viewName) {
 document.getElementById('btn-create-new').addEventListener('click', async () => {
     switchView('editor');
     initMap('map-container');
+    resetEditor();
     // hent tasks og tegn liste
     await loadTasks();
     renderTaskList();
@@ -47,47 +59,7 @@ document.getElementById('btn-back').addEventListener('click', () => {
 });
 
 
-//Opret et scenario
-const scenario = new Scenario();
-scenario.scenarioId = "S1";
-scenario.scenarioTitle = "Finderup Nat�velse";
-scenario.scenarioEnvironment = "land";
-scenario.scenarioCreatedBy = "Bo";
 
-//Opret en task
-const task = new Task();
-task.idT = 101;
-task.taskId = "T15";
-task.taskTitle = "Patrulje i nat";
-task.mapType = "zone";
-
-//Tilf�j til scenario
-scenario.tasks.push(task);
-
-//Opret options
-const optionA = new Option();
-optionA.optionId = "A";
-optionA.optionText = "Vil du blive her";
-optionA.isCorrect = true;
-
-const optionB = new Option();
-optionB.optionId = "B";
-optionB.optionText = "Vil du ud og se";
-optionB.isCorrect = false;
-
-//Tilf�j til task
-task.options.push(optionA, optionB);
-
-
-//JSON fil
-// JSON.stringify(value, replacer, space)
-const jsonString = JSON.stringify(scenario, null, 2);
-console.log('Scenario JSON:', jsonString);
-
-
-//Json indlæsning fra Team 1
-let allTasks = []; // her gemmer vi tasks fra JSON
-let selectedTasks = [];   // opgaver som gamemaster har markeret
 
 // Hent tasks fra JSON-filen
 async function loadTasks() {
@@ -192,16 +164,14 @@ function renderTaskList() {
             });
         }
 
-const scenariosData = localStorage.getItem('gamemaster_scenarios');
 
 
-console.log(scenariosData);
  document.getElementById('download-btn').addEventListener('click', () => {
     downloadJSON("Scenarios.json", localStorage.getItem('gamemaster_scenarios'));
  })
 
 //render tasknames
-function mapTeam1TaskToOurTask(team1Task, index) {
+function mapTasksToScenario(team1Task, index) {
     const task = new Task();
 
     task.idT = index + 1;
@@ -230,62 +200,79 @@ function mapTeam1TaskToOurTask(team1Task, index) {
 }
 
 
-//Ny json fil
+// "Gem" knap logic
 document.getElementById('btn-save').addEventListener('click', () => {
-    // 1) Opdatér scenarie-info fra felterne i UI
     const nameInput = document.getElementById('scenario-name');
     const typeSelect = document.getElementById('scenario-type');
+    const scenarioDesc = document.getElementById('scenario-desc')
+    // Opdater objektet med værdier fra UI
+    currentScenario.scenarioTitle = nameInput.value || "Uden navn";
+    currentScenario.scenarioEnvironment = typeSelect.value === "choose" ? "" : typeSelect.value;
+    currentScenario.scenarioDescription = scenarioDesc.value || "Ingen beskrivelse";
+    currentScenario.scenarioCreatedTime = new Date(); // Opdater tidspunktet for redigering
+    currentScenario.scenarioIsActive = true;
+    // Konverter selectedTasks til det rigtige format
+    currentScenario.tasks = selectedTasks.map((t, index) => mapTasksToScenario(t, index));
 
-    scenario.scenarioTitle = nameInput.value || "Uden navn";
-    scenario.scenarioEnvironment = typeSelect.value === "choose" ? "" : typeSelect.value;
-    scenario.scenarioCreatedTime = new Date();
-    scenario.scenarioIsActive = true;
-
-    // 2) Byg tasks-listen ud fra selectedTasks
-    scenario.tasks = selectedTasks.map((t, index) => mapTeam1TaskToOurTask(t, index));
-
-
-    // 3) Lav et “rent” objekt i den struktur du ønsker
-    const exportScenario = {
-        scenarioId: scenario.scenarioId,
-        scenarioTitle: scenario.scenarioTitle,
-        scenarioDescription: scenario.scenarioDescription || "",
-        scenarioEnvironment: scenario.scenarioEnvironment,
-        scenarioCreatedBy: scenario.scenarioCreatedBy,
-        scenarioCreatedTime: scenario.scenarioCreatedTime.toISOString(),
-        scenarioIsActive: scenario.scenarioIsActive,
-        tasks: scenario.tasks.map(t => ({
-            idT: t.idT,
-            taskId: t.taskId,
-            taskTitle: t.taskTitle,
-            taskDescription: t.taskDescription,
-            orderNumber: t.orderNumber,
-            mapType: t.mapType,
-            mapRadiusInMeters: t.mapRadiusInMeters,
-            mapLabel: t.mapLabel,
-            mapLat: t.mapLat,
-            mapLng: t.mapLng,
-            isActive: t.isActive
-        }))
-    };
-    switchView('dashboard');
-    saveScenarioToStorage(exportScenario);
-    updateDashboardView();
-    const jsonString = JSON.stringify(exportScenario, null, 2);
-    console.log("Eksporteret scenarie JSON:", jsonString);
+    // Gem (data-manager håndterer nu om det er update eller create)
+    saveScenarioToStorage(currentScenario);
     
-   /*
-    // 4) Download som .json-fil
-    const blob = new Blob([jsonString], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = (scenario.scenarioId || "scenario") + ".json"; // fx S1.json
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    URL.revokeObjectURL(url);
-   */
+    // Gå tilbage
+    switchView('dashboard');
+    updateDashboardView();
 });
+
+// Funktion til at klargøre editor til et NYT scenarie
+function resetEditor() {
+    currentScenario = new Scenario();
+    currentScenario.scenarioId = "S" + Date.now(); 
+    currentScenario.scenarioCreatedBy = "Gamemaster"; // Her kunne der være en dynamisk bruger med auth.
+    selectedTasks = [];
+    // Nulstil UI felter
+    document.getElementById('scenario-name').value = "";
+    document.getElementById('scenario-type').value = "choose";
+    document.getElementById('scenario-desc').value = "";
+    updateTaskSelectionUIAndMap();
+}
+
+// Funktion til at indlæse et EKSISTERENDE scenarie (kaldes fra ui-manager)
+export async function editScenario(id) {
+    const scenarios = getScenariosFromStorage();
+    const foundScenario = scenarios.find(s => s.scenarioId === id);
+    
+    if (!foundScenario) {
+        console.error("Scenarie ikke fundet:", id);
+        return;
+    }
+
+    // Sæt currentScenario til det fundne
+    currentScenario = foundScenario;
+
+    // Sæt UI felter
+    document.getElementById('scenario-name').value = currentScenario.scenarioTitle;
+    document.getElementById('scenario-type').value = currentScenario.scenarioEnvironment || "choose";
+
+    // Vi skal sikre at map og tasks er klar
+    switchView('editor');
+    initMap('map-container');
+    if (allTasks.length === 0) await loadTasks();
+
+    // Genopret selectedTasks baseret på scenariets gemte tasks
+    // Vi skal matche dem med 'allTasks' for at få de originale data (som lokation osv.)
+    selectedTasks = [];
+    
+    currentScenario.tasks.forEach(savedTask => {
+        // Vi antager at 'taskId' i savedTask svarer til 'T' + ID i allTasks (f.eks. T15 -> ID 15)
+        // Eller vi matcher på ID hvis du har gemt det rå ID.
+        // Baseret på din mapTeam1TaskToOurTask, gemmer du taskId som "T" + ID.
+        const originalId = parseInt(savedTask.taskId.replace('T', ''));
+        const originalTask = allTasks.find(t => t.ID === originalId);
+        
+        if (originalTask) {
+            selectedTasks.push(originalTask);
+        }
+    });
+
+    renderTaskList();
+    updateTaskSelectionUIAndMap(); // Tegner cirklerne på kortet igen
+}
