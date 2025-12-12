@@ -142,7 +142,7 @@ function renderTaskList() {
 
 //Ny json fil
 document.getElementById('btn-save').addEventListener('click', () => {
-    // Opdatér scenarie-info fra felterne i UI
+    // 1) Opdatér scenarie-info fra felterne i UI
     const nameInput = document.getElementById('scenario-name');
     const typeSelect = document.getElementById('scenario-type');
 
@@ -151,7 +151,7 @@ document.getElementById('btn-save').addEventListener('click', () => {
     scenario.scenarioCreatedTime = new Date();
     scenario.scenarioIsActive = true;
 
-    // Byg tasks-listen ud fra selectedTasks
+    // 2) Byg tasks-listen ud fra selectedTasks
     scenario.tasks = selectedTasks.map((t, index) => {
         const task = new Task();
         task.idT = index + 1;
@@ -163,7 +163,7 @@ document.getElementById('btn-save').addEventListener('click', () => {
         return task;
     });
 
-    //Lav et “rent” objekt i ønsket struktur
+    // 3) Lav et “rent” objekt i den struktur du ønsker
     const exportScenario = {
         scenarioId: scenario.scenarioId,
         scenarioTitle: scenario.scenarioTitle,
@@ -183,7 +183,7 @@ document.getElementById('btn-save').addEventListener('click', () => {
     const jsonString = JSON.stringify(exportScenario, null, 2);
     console.log("Eksporteret scenarie JSON:", jsonString);
 
-    // Download som .json-fil
+    // 4) Download som .json-fil
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
@@ -196,4 +196,3 @@ document.getElementById('btn-save').addEventListener('click', () => {
 
     URL.revokeObjectURL(url);
 });
-
