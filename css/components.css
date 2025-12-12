@@ -329,3 +329,17 @@ display: flex;
 .geo-consent-btn + .geo-consent-btn {
     margin-left: 8px;
 }
+
+.leaflet-user-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.user-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    background: #1e88e5;
+    border: 3px solid #ffffff;
+    box-shadow: 0 0 0 2px rgba(30,136,229,0.35);
+}

@@ -1,8 +1,15 @@
 // MAP MANAGER
 let map = null;
+let userMarker = null;
+let userAccuracyCircle = null;
+let searchRadiusCircle = null;
+
+
 
 // Gemmer cirkler/markører pr task-ID
 const taskLayers = new Map();
+
+
 
 export function initMap(elementId) {
     if (map !== null) {
@@ -50,6 +57,59 @@ export function centerMapOnLocation(lat, lng, zoomLevel = 15) {
     map.setView([lat, lng], zoomLevel);
 }
 
+// ------------------------------------------
+// Viser "du er her" på kortet (marker + accuracy cirkel)
+// Kaldes igen -> opdaterer eksisterende i stedet for at lave ny
+export function upsertUserLocation(lat, lng, accuracyMeters = null, draggable = true) {
+    if (!map) return;
+
+    const pos = [lat, lng];
+
+    // Opret marker første gang
+    if (!userMarker) {
+        const icon = L.divIcon({
+            className: "leaflet-user-icon",
+            html: `<div class="user-dot"></div>`,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+
+        userMarker = L.marker(pos, { icon, draggable }).addTo(map);
+
+        // Drag events (bind kun én gang)
+        if (draggable) {
+            userMarker.on("drag", (e) => {
+                const p = e.target.getLatLng();
+                if (userAccuracyCircle) userAccuracyCircle.setLatLng(p);
+            });
+
+            userMarker.on("dragend", (e) => {
+                const p = e.target.getLatLng();
+                window.dispatchEvent(new CustomEvent("userLocationMoved", {
+                    detail: { lat: p.lat, lng: p.lng }
+                }));
+            });
+        }
+    } else {
+        // Opdater eksisterende marker (vigtigt!)
+        userMarker.setLatLng(pos);
+    }
+
+    // Accuracy circle: opret eller opdatér
+    if (accuracyMeters && Number(accuracyMeters) > 0) {
+        if (!userAccuracyCircle) {
+            userAccuracyCircle = L.circle(pos, { radius: Number(accuracyMeters) }).addTo(map);
+        } else {
+            userAccuracyCircle.setLatLng(pos);
+            userAccuracyCircle.setRadius(Number(accuracyMeters));
+        }
+    } else {
+        if (userAccuracyCircle) {
+            map.removeLayer(userAccuracyCircle);
+            userAccuracyCircle = null;
+        }
+    }
+}
 // ------------------------------------------
 
 // Bruges hvis du vil have en almindelig markør
@@ -105,4 +165,19 @@ export function removeTaskCircle(taskId) {
         map.removeLayer(layer);
         taskLayers.delete(taskId);
     }
+}
+
+export function upsertSearchRadius(lat, lng, radiusMeters) {
+    if (!map) return;
+
+    if (searchRadiusCircle) {
+        map.removeLayer(searchRadiusCircle);
+        searchRadiusCircle = null;
+    }
+
+    if (!radiusMeters || Number(radiusMeters) <= 0) return;
+
+    searchRadiusCircle = L.circle([lat, lng], {
+        radius: Number(radiusMeters)
+    }).addTo(map);
 }
