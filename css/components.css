@@ -17,6 +17,10 @@ button {
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.25);
     }
 }
+#btn-create-new{
+    margin: 2% 5% 0 0;
+    padding: 1% 2.5%;
+}
 #view-editor{
     #btn-back{
         position: absolute;
@@ -29,33 +33,67 @@ button {
     z-index: 1;
 }
 
+/*Styling af task-sidebar*/
+
 #task-sidebar {
     position: absolute;      
     top: 10px;               
-    right: 10px;           
-    width: 40vw;             
-    height: 90vh;            
+    left: 10px;           
+    width: 30%;             
+    height: 80%;            
     background: #3F5B58;     
     padding: 25px;           
-    border-radius: 8px;      
+    border-radius: 5px;      
     box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
     overflow-y: auto;
     z-index: 100;        
 }
+
+/*Tekst styling*/
+#task-sidebar label,
+#task-sidebar h3 {
+    color: #fff;
+    font-family: var(--font-family);
+    font-weight: 500;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+/*styling af felter og knapper*/
+
 #task-sidebar input,
 #task-sidebar select,
 #task-sidebar button {
-    width: 90%;
+    width: 100%;
     margin-bottom: 10px;
-    padding: 6px;
+    padding: 10px;
+    margin-top: 5px;
     border-radius: 5px;
     border: 1px solid #ccc;
+    font-family: var(--font-family);
+    font-size: 14px;
+    box-sizing: border-box;
+
+}
+#task-sidebar button {
+   
+    cursor: pointer;
+    display: flex;             /* hvis du har ikon */
+    align-items: center;       /* centrer ikon lodret */
+    justify-content: space-between; /* tekst til venstre, ikon til højre */
 }
 
-.scrollable-list {
-    max-height: 50%;          
-    overflow-y: scroll;
+/*Styling af scroll-box*/
+
+#div-task-list {
+    max-height: 300px;   /* fast højde */
+    overflow-y: auto;    /* scroll hvis nødvendigt */
     border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #ffffff;
+}
+#task-list {
+    list-style-type: none;
     padding: 5px;
     margin-bottom: 10px;
   }

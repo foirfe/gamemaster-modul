@@ -1,6 +1,7 @@
 //Main // test
 import { initMap } from './map-manager.js';
 import { Scenario, Task, Option } from './models.js';
+import { downloadJSON, saveScenarioToStorage } from './data-manager.js';
 
 //Navigation
 const dashboardView = document.getElementById('view-dashboard');
@@ -140,6 +141,14 @@ function renderTaskList() {
     });
 }
 
+const scenariosData = localStorage.getItem('gamemaster_scenarios');
+
+
+console.log(scenariosData);
+ document.getElementById('download-btn').addEventListener('click', () => {
+    downloadJSON("Scenarios.json", localStorage.getItem('gamemaster_scenarios'));
+    })
+
 //Ny json fil
 document.getElementById('btn-save').addEventListener('click', () => {
     // 1) Opdatér scenarie-info fra felterne i UI
@@ -179,10 +188,12 @@ document.getElementById('btn-save').addEventListener('click', () => {
             mapRadiusInMeters: t.mapRadiusInMeters
         }))
     };
-
+    switchView('dashboard');
+    saveScenarioToStorage(exportScenario);
     const jsonString = JSON.stringify(exportScenario, null, 2);
     console.log("Eksporteret scenarie JSON:", jsonString);
-
+    
+   /*
     // 4) Download som .json-fil
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -195,4 +206,5 @@ document.getElementById('btn-save').addEventListener('click', () => {
     document.body.removeChild(a);
 
     URL.revokeObjectURL(url);
+   */
 });

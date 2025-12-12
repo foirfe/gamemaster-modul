@@ -5,7 +5,7 @@
     --background-color: #E9EBEB;
     --military-green: #647851;
     --navy-blue: #1D2C50;
-    --font-family: Verdana, Geneva, Tahoma, sans-serif;
+    --font-family: 'Verdana Pro', Geneva, Tahoma, sans-serif;
 }
 html, body {
     margin: 0;
@@ -18,6 +18,12 @@ html, body {
 h1, h2, h3 {
     font-weight: bold;
 }
+h1{
+    color: var(--secondary-color);
+    text-transform: uppercase;
+    font-weight: bolder;
+}
+
 /*Views*/
 .view-hidden {
     display: none !important;

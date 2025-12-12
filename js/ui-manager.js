@@ -1,58 +1,22 @@
-//UI MANAGER
-export function initSidebar () {
+const btnImport = document.getElementById('btn-import');
+const taskList = document.getElementById('task-list');
 
-//Fanger task-sidebar
-const sidebar = document.getElementById("task-sidebar");
+btnImport.addEventListener('click', () => {
+    // Hent JSON-fil (dummy-fil)
+    fetch('dummy-tasks.json') // navnet på din fil
+        .then(response => response.json())
+        .then(data => {
+            // Ryd listen først
+            taskList.innerHTML = '';
 
-//Inputfelt til scenarienavn
-const input = document.createElement("input");
-input.type = "text";
-input.id = "scenarie-name";
-input.placeholder = "Skriv scenarienavn";
-sidebar.appendChild(input);
-
-//Dropdown til lands/vands
-const select = document.createElement("select");
-select.id = "scenarie-type";
-
-const optionLand = document.createElement("option");
-optionLand = "land";
-optionLand.textContent = "Land";
-select.appendChild(optionLand);
-
-const optionWater = document.createElement("option");
-optionWater = "water";
-optionWater.textContent = "vand";
-select.appendChild("optionWater");
-
-sidebar.appendChild(select);
-
-//Importér-knap
-const importBtn = document.createElement("button");
-importBtn.id = "import-task";
-importBtn.textContent = "Importer opgaver";
-sidebar.appendChild(importBtn);
-
-//Liste til opgave
-const taskList = document.createElement("div");
-taskList.id = "task-list";
-taskList.classList.add("scrollable-list");
-sidebar.appendChild(taskList);
-
-//Gem-knap
-const saveBtn = document.createElement("button");
-saveBtn.id = "save-scenario";
-saveBtn.textContent = "Gem scenarie";
-sidebar.appendChild(saveBtn);
-
-//Eventlisteners
-importBtn.addEventListener("click", () => {
-    console.log("importer opgave klikket");
+            // Tilføj opgaver til ul
+            data.forEach(task => {
+                const li = document.createElement('li');
+                li.textContent = `${task.taskTitle} - ${task.taskDescription}`;
+                taskList.appendChild(li);
+            });
+        })
+        .catch(err => {
+            console.error('Kunne ikke hente filen:', err);
+        });
 });
-
-saveBtn.addEventListener("click", () => {
-    const name = input.value;
-    const type = select.value;
-    console.log("Gem scenarie:", name, type)
-});
-}
