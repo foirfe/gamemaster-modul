@@ -10,7 +10,24 @@ export function initMap(elementId) {
         return map;
     }
 
-    map = L.map(elementId, { zoomControl: false }).setView([56.2639, 9.5018], 7);
+    // Startkort centreret på Danmark eller sidste kendte lokation
+    let startLat = 56.2639;
+    let startLng = 9.5018;
+    let startZoom = 7;
+
+    if (typeof window.getLastLocation === 'function') { 
+        const lastLocation = window.getLastLocation(); 
+        if (lastLocation && lastLocation.lat && lastLocation.lng) { 
+            startLat = lastLocation.lat;
+            startLng = lastLocation.lng;
+            startZoom = 12; // zoom tættere ind
+        }
+    }
+
+    map = L.map(elementId, { zoomControl: false }).setView([startLat, startLng], startZoom);
+
+    // tidligere hardcodet visning af Danmark
+    // map = L.map(elementId, { zoomControl: false }).setView([56.2639, 9.5018], 7);
 
     L.control.zoom({
         position: 'bottomright'
@@ -23,6 +40,17 @@ export function initMap(elementId) {
 
     return map;
 }
+
+// ------------------------------------------
+
+// Centrer kortet på geo-lokation
+export function centerMapOnLocation(lat, lng, zoomLevel = 15) {
+    if (!map) return;
+
+    map.setView([lat, lng], zoomLevel);
+}
+
+// ------------------------------------------
 
 // Bruges hvis du vil have en almindelig markør
 export function addMarkerToMap(lat, lng, title) {
