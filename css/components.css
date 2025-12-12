@@ -126,7 +126,8 @@ button {
 .task-item-title {
     font-weight: 600;
     margin-bottom: 2px;
-    font-size: 0.95rem;
+    font-size: 14px;
+    font-family: var(--font-family);
 }
 
 .task-item-desc {
@@ -138,7 +139,7 @@ button {
     position: relative;
     background-color: rgba(255, 255, 255, 0.9);
     border: 2px solid #ffffff;
-    box-shadow: 0 0 0 2px #f5c14b; /* “glow” omkring kortet */
+    box-shadow: 0 0 0 2px var(--secondary-color); /* “glow” omkring kortet */
 }
 
     /* Lille overlay-tjekmark øverst til højre (valgfrit, men ser nice ud) */
