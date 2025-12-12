@@ -1,0 +1,33 @@
+{
+  "scenarioId": "S1",
+  "scenarioTitle": "Uden navn",
+  "scenarioCreatedBy": "Bo",
+  "scenarioCreatedTime": "2025-12-12T05:47:23.570Z",
+  "scenarioIsActive": true,
+  "tasks": [
+    {
+      "idT": 1,
+      "taskId": "T15",
+      "taskTitle": "Patrulje i nat",
+      "taskDescription": "Se efter i området for at se, om alt er ok",
+      "mapType": "zone",
+      "mapRadiusInMeters": 100
+    },
+    {
+      "idT": 2,
+      "taskId": "T21",
+      "taskTitle": "Sikringspost Syd",
+      "taskDescription": "Etabler en sikringspost og rapportér observeret aktivitet mod syd.",
+      "mapType": "zone",
+      "mapRadiusInMeters": 150
+    },
+    {
+      "idT": 3,
+      "taskId": "T22",
+      "taskTitle": "Førstehjælpsstation",
+      "taskDescription": "Opsæt en midlertidig førstehjælpsstation og marker området på kortet.",
+      "mapType": "punkt",
+      "mapRadiusInMeters": 20
+    }
+  ]
+}
