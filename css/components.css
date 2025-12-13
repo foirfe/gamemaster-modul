@@ -381,3 +381,26 @@ display: flex;
 #search-radius-wrapper {
     transition: opacity 0.2s ease;
 }
+
+/* Task badge på kortet (samme look som i listen) */
+.leaflet-task-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+    .leaflet-task-icon .task-order-badge {
+        min-width: 1.8rem;
+        height: 1.8rem;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-family: var(--font-family);
+        background: #2c3e3f; /* samme som selected i listen */
+        color: #ffffff;
+        border: 2px solid #ffffff;
+        box-shadow: 0 0 0 2px var(--secondary-color);
+        font-size: 0.9rem;
+    }
+

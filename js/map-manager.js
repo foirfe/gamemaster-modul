@@ -190,3 +190,12 @@ export function clearSearchRadius() {
         searchRadiusCircle = null;
     }
 }
+
+export function clearAllTaskLayers() {
+    if (!map) return;
+
+    for (const layer of taskLayers.values()) {
+        map.removeLayer(layer);
+    }
+    taskLayers.clear();
+}

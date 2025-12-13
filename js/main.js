@@ -1,5 +1,5 @@
 //Main // test
-import { initMap, clearSearchRadius , upsertSearchRadius , upsertTaskCircle, removeTaskCircle, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
+import { initMap, clearAllTaskLayers, clearSearchRadius , upsertSearchRadius , upsertTaskCircle, removeTaskCircle, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
 import { Scenario, Task, Option } from './models.js';
 import {  saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
 import { renderDashboard } from './ui-manager.js';
@@ -193,42 +193,46 @@ function renderTaskList() {
     });
 }
 
-        function updateTaskSelectionUIAndMap() {
-            // 1) Nulstil alle badges + selected-styles
-            const listEl = document.getElementById('task-list');
-            const allLis = listEl.querySelectorAll('.task-item');
+function updateTaskSelectionUIAndMap() {
+    const listEl = document.getElementById('task-list');
+    if (!listEl) return;
 
-            allLis.forEach(li => {
-                li.classList.remove('task-item-selected');
-                const badge = li.querySelector('.task-order-badge');
-                if (badge) badge.textContent = "";
-            });
+    // Ryd ALLE task-lag på kortet først (så gamle prikker ikke bliver hængende)
+    clearAllTaskLayers();
 
-            // 2) Gå de valgte tasks igennem i rækkefølge og giv dem nummer + cirkel
-            selectedTasks.forEach((t, index) => {
-                const orderNumber = index + 1;
+    // Nulstil alle badges + selected-styles i listen
+    const allLis = listEl.querySelectorAll('.task-item');
 
-                // Find det li-element, der matcher tasken
-                const li = listEl.querySelector(`li[data-task-id="${t.ID}"]`);
-                if (li) {
-                    li.classList.add('task-item-selected');
-                    const badge = li.querySelector('.task-order-badge');
-                    if (badge) badge.textContent = orderNumber;
-                }
+    allLis.forEach(li => {
+        li.classList.remove('task-item-selected');
 
-                // Tegn/Opdatér cirkel på kortet
-                if (Array.isArray(t.Lokation) && t.Lokation.length >= 2) {
-                    const lat = Number(t.Lokation[0]);
-                    const lng = Number(t.Lokation[1]);
-                    const radius = Number(t.Radius ?? 0);
+        const badge = li.querySelector('.task-order-badge');
+        if (badge) badge.textContent = "";
+    });
 
-                    upsertTaskCircle(t.ID, lat, lng, radius, orderNumber);
-                }
-            });
+    // Gå valgte tasks igennem (i rækkefølge) og opdatér både liste + kort
+    selectedTasks.forEach((t, index) => {
+        const orderNumber = index + 1;
+
+        // --- LISTE: marker + nummer badge ---
+        const li = listEl.querySelector(`li[data-task-id="${t.ID}"]`);
+        if (li) {
+            li.classList.add('task-item-selected');
+
+            const badge = li.querySelector('.task-order-badge');
+            if (badge) badge.textContent = orderNumber;
         }
 
+        // --- KORT: tegn marker + evt. radius ---
+        if (Array.isArray(t.Lokation) && t.Lokation.length >= 2) {
+            const lat = Number(t.Lokation[0]);
+            const lng = Number(t.Lokation[1]);
+            const radius = Number(t.Radius ?? 0);
 
-
+            upsertTaskCircle(t.ID, lat, lng, radius, orderNumber);
+        }
+    });
+}
 
 
 //render tasknames
