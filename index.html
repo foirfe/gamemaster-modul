@@ -12,8 +12,8 @@
     <title>Gamemaster Modul</title>
 </head>
 <body>
-
-        <section id="view-dashboard" class="view-active">
+        <!--DASHBOARD VIEW-->
+        <section id="view-dashboard" class="view-active" aria-label="Scenarie oversigts-panel">
         <div id="header-row">
             <h1>Scenarier <button id="btn-geo-toggle" title="Location settings">Location</button></h1>
             <button id="btn-create-new" class="btn-primary">Opret Nyt Scenarie</button>
@@ -22,17 +22,15 @@
             <div class="scenario-list-and-btn">
             <div id="scenario-list">
             </div>
-            <button id="download-btn">Download JSON</button>
             </div>
     </section>
-
-
-    <section id="view-editor" class="view-hidden">
+    <!--EDITOR VIEW-->
+    <section id="view-editor" class="view-hidden" aria-label="Scenarie editor">
         <button id="btn-back">Tilbage til oversigt</button>
         <div class="editor-layout">
             <aside id="task-sidebar">
                 <button id="btn-import">
-                    Importér opgaver<span class="material-symbols-outlined">
+                    Importér opgaver<span class="material-symbols-outlined" aria-hidden="true">
                         upload
                     </span>
                 </button>
@@ -48,25 +46,15 @@
                     <option value="land">Land</option>
                     <option value="vand">Vand</option>
                 </select>
-
                 <label for="nearby-radius">Søgeradius (Meter)</label>
                 <input id="nearby-radius" type="range" min="250" max="20000" step="250" value="5000">
                 <div id="nearby-radius-value">5000 m</div>
-
-
                 <button id="btn-filter-nearby">Vis opgaver i nærheden</button>
-
                 <button id="btn-location-reset">Nulstil placering (GPS)</button>
-
-
-
-
-
                 <h3>Tilgængelige opgaver</h3>
                 <button id="btn-filter-reset">Vis alle opgaver</button>
                 <div id="div-task-list" class="scrollable-list">
                     <ul id="task-list" class="task-list"></ul>
-
                 </div>
                 <button id="btn-save">
                     Gem<span class="material-symbols-outlined">
@@ -77,7 +65,6 @@
             <div id="map-container"></div>
         </div>
     </section>
-
 
     <script type="module" src="js/main.js"></script>
     <script src="js/geo-location.js"></script>

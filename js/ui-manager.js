@@ -1,81 +1,78 @@
 //UI MANAGER
+import { downloadJSON } from './data-manager.js';
 // Renderer listen af scenarier på dashboardet.
 export function renderDashboard(scenarios) {
     const listContainer = document.getElementById('scenario-list');
-    const downloadBtn = document.getElementById('download-btn');
-    // 1. Ryd listen sikkert
+    
+    // Ryd listen sikkert
     listContainer.textContent = ''; 
-    // 2. Tjek om der er scenarier
+
+    //  Tjekker om der er scenarier
     if (!scenarios || scenarios.length === 0) {
-        // Ingen scenarier: Vis besked og skjul download-knap
         const p = document.createElement('p');
         p.classList.add('no-scenarios');
         p.textContent = 'Der er ingen gemte scenarier. Opret et nyt for at komme i gang.';
         listContainer.appendChild(p);
-        if (downloadBtn) {
-            downloadBtn.style.display = 'none';
-        }
         return; 
     }
-    // Hvis der er scenarier: Vis download-knap
-    if (downloadBtn) {
-        downloadBtn.style.display = 'inline-block';
-    }
 
-    //Byg listen med DOM metoder
+    // GRID CONTAINER TIL ALLE SCENARIER
     const ul = document.createElement('ul');
     ul.className = 'scenario-list'; 
+    // LÆSER SCENARIOS OG BYGGER DEM OM
     scenarios.forEach(scenario => {
         const li = document.createElement('li');
-        li.className = 'scenario-item'; // Genbruger din eksisterende CSS klasse
-        // Pæn formatering af dato
+        li.className = 'scenario-item'; 
+
         const dateStr = new Date(scenario.scenarioCreatedTime).toLocaleString('da-DK', {
              day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit'
         });
-        // 1. Titel sektion
+
+        // DOM OPBYGGELSE
         const titleDiv = document.createElement('div');
         titleDiv.className = 'scenario-item-title';
         titleDiv.textContent = scenario.scenarioTitle;
         const descDiv = document.createElement('div');
-        descDiv.className = 'scenario-desc';
+        descDiv.className = 'scenario-item-desc'
         descDiv.textContent = scenario.scenarioDescription;
-        // 2. Beskrivelse sektion
         const infoDiv = document.createElement('div');
-        infoDiv.className = 'scenario-item-desc';
+        infoDiv.className = 'scenario-item-info';
         infoDiv.textContent = `Miljø: ${scenario.scenarioEnvironment || 'Ikke angivet'} | Oprettet: ${dateStr} | Opgaver: ${scenario.tasks ? scenario.tasks.length : 0}`;
-       // REDIGER KNAP
+        const btnsContainer = document.createElement('div');
+        btnsContainer.className = 'btns-container';
+        // REDIGER
         const editBtn = document.createElement('button');
-        editBtn.textContent = `Redigere`;
+        editBtn.textContent = `Rediger`;
+        editBtn.setAttribute('aria-label', `Rediger scenariet: ${scenario.scenarioTitle}`);
         editBtn.onclick = (e) => {
-            e.stopPropagation(); // Undgå at klikke på selve LI elementet også
-            // Kald funktionen fra main.js
-            if (typeof window.editScenario === 'function') {
-                 window.editScenario(scenario.scenarioId);
-            } else {
-                 console.error("editScenario funktion ikke fundet");
-            }
+            if (typeof window.editScenario === 'function') window.editScenario(scenario.scenarioId);
         };
-
-        // SLET KNAP
+        // SLET
         const deleteScenarioBtn = document.createElement('button');
         deleteScenarioBtn.textContent = `Slet`;
+        deleteScenarioBtn.setAttribute('aria-label', `Slet scenariet: ${scenario.scenarioTitle}`);
         deleteScenarioBtn.onclick = (e) => {
-            e.stopPropagation(); // Stop klikket fra at åbne scenariet
-            // Kald funktionen vi lavede i main.js
-            if (typeof window.handleDeleteScenario === 'function') {
-                window.handleDeleteScenario(scenario.scenarioId);
-            } else {
-                console.error("handleDeleteScenario funktion ikke fundet.");
-            }
+            if (typeof window.handleDeleteScenario === 'function') window.handleDeleteScenario(scenario.scenarioId);
         };
+        btnsContainer.appendChild(editBtn);
+        btnsContainer.appendChild(deleteScenarioBtn);
         li.appendChild(titleDiv);
         li.appendChild(descDiv);
-        li.appendChild(editBtn);
-        li.appendChild(deleteScenarioBtn);
-        li.addEventListener('click', () => {
-            console.log("Klikket på scenarie:", scenario.scenarioTitle);
-        });
+        li.appendChild(infoDiv);
+        li.appendChild(btnsContainer);
         ul.appendChild(li);
     });
+
+    // Opretter "Download JSON" knap som det sidste element
+    const downloadLi = document.createElement('li');
+    downloadLi.className = 'scenario-item download-card';
+
+    const downloadBtn = document.createElement('button');
+    downloadBtn.textContent = 'Download JSON';
+    downloadBtn.onclick = () => {
+        downloadJSON("Scenarios.json", localStorage.getItem('gamemaster_scenarios'));
+    };
+    downloadLi.appendChild(downloadBtn);
+    ul.appendChild(downloadLi);
     listContainer.appendChild(ul);
 }

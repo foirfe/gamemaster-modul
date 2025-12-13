@@ -1,7 +1,7 @@
 //Main // test
 import { initMap, upsertSearchRadius , upsertTaskCircle, removeTaskCircle, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
 import { Scenario, Task, Option } from './models.js';
-import { downloadJSON, saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
+import {  saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
 import { renderDashboard } from './ui-manager.js';
 
 
@@ -159,38 +159,38 @@ function renderTaskList() {
     // Brug filteredTasks hvis vi har filter aktivt, ellers allTasks
     const tasksToShow = filteredTasks ?? allTasks;
 
-    tasksToShow.forEach(team1Task => {
+    tasksToShow.forEach(teamTask => {
         const li = document.createElement('li');
         li.classList.add('task-item');
 
         li.innerHTML = `
     <div class="task-item-content">
         <div>
-            <div class="task-item-title">${team1Task.ID} - ${team1Task.Titel}</div>
-            <div class="task-item-desc">${team1Task.Beskrivelse}</div>
+            <div class="task-item-title">${teamTask.ID} - ${teamTask.Titel}</div>
+            <div class="task-item-desc">${teamTask.Beskrivelse}</div>
         </div>
         <div class="task-order-badge"></div>
     </div>
 `;
 
         // gem ID på elementet
-        li.dataset.taskId = team1Task.ID;
+        li.dataset.taskId = teamTask.ID;
 
 
-        const isSelected = selectedTasks.some(t => t.ID === team1Task.ID);
+        const isSelected = selectedTasks.some(t => t.ID === teamTask.ID);
         if (isSelected) li.classList.add('task-item-selected');
 
         li.addEventListener('click', () => {
-            const existingIndex = selectedTasks.findIndex(t => t.ID === team1Task.ID);
+            const existingIndex = selectedTasks.findIndex(t => t.ID === teamTask.ID);
 
             if (existingIndex === -1) {
                 // Ikke valgt endnu → tilføj
-                selectedTasks.push(team1Task);
+                selectedTasks.push(teamTask);
             } else {
                 // Allerede valgt → fjern
                 selectedTasks.splice(existingIndex, 1);
                 // Fjern cirkel fra kortet for den task
-                removeTaskCircle(team1Task.ID);
+                removeTaskCircle(teamTask.ID);
             }
 
             // Efter vi har opdateret selectedTasks, opdaterer vi både badges og cirkler
@@ -238,31 +238,29 @@ function renderTaskList() {
 
 
 
- document.getElementById('download-btn').addEventListener('click', () => {
-    downloadJSON("Scenarios.json", localStorage.getItem('gamemaster_scenarios'));
- })
+
 
 //render tasknames
-function mapTasksToScenario(team1Task, index) {
+function mapTasksToScenario(teamTask, index) {
     const task = new Task();
 
     task.idT = index + 1;
     task.orderNumber = index + 1;
 
-    task.taskId = `T${team1Task.ID}`;
-    task.taskTitle = team1Task.Titel ?? "";
-    task.taskDescription = team1Task.Beskrivelse ?? "";
+    task.taskId = `T${teamTask.ID}`;
+    task.taskTitle = teamTask.Titel ?? "";
+    task.taskDescription = teamTask.Beskrivelse ?? "";
 
     // Aktiveringsbetingelse: "Zone" -> zone, "Lokalitet" -> punkt
-    const act = (team1Task.Aktiveringsbetingelse ?? "").toLowerCase();
+    const act = (teamTask.Aktiveringsbetingelse ?? "").toLowerCase();
     task.mapType = act === "zone" ? "zone" : "punkt";
 
-    task.mapRadiusInMeters = Number(team1Task.Radius ?? 0);
+    task.mapRadiusInMeters = Number(teamTask.Radius ?? 0);
 
     // Lokation: [lat, lng]
-    if (Array.isArray(team1Task.Lokation) && team1Task.Lokation.length >= 2) {
-        task.mapLat = Number(team1Task.Lokation[0]);
-        task.mapLng = Number(team1Task.Lokation[1]);
+    if (Array.isArray(teamTask.Lokation) && teamTask.Lokation.length >= 2) {
+        task.mapLat = Number(teamTask.Lokation[0]);
+        task.mapLng = Number(teamTask.Lokation[1]);
     }
 
     task.mapLabel = `OP${index + 1}`;
@@ -323,6 +321,7 @@ export async function editScenario(id) {
 
     // Sæt UI felter
     document.getElementById('scenario-name').value = currentScenario.scenarioTitle;
+    document.getElementById('scenario-desc').value = currentScenario.scenarioDescription;
     document.getElementById('scenario-type').value = currentScenario.scenarioEnvironment || "choose";
 
     // Vi skal sikre at map og tasks er klar
@@ -337,7 +336,6 @@ export async function editScenario(id) {
     currentScenario.tasks.forEach(savedTask => {
         // Vi antager at 'taskId' i savedTask svarer til 'T' + ID i allTasks (f.eks. T15 -> ID 15)
         // Eller vi matcher på ID hvis du har gemt det rå ID.
-        // Baseret på din mapTeam1TaskToOurTask, gemmer du taskId som "T" + ID.
         const originalId = parseInt(savedTask.taskId.replace('T', ''));
         const originalTask = allTasks.find(t => t.ID === originalId);
         
