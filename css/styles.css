@@ -12,7 +12,7 @@ html, body {
     padding: 0;
     height: 100%; /* Fylder hele vinduet */
     font-family: sans-serif; /*Fallback til ældre browsere*/
-    font-family: var(--headings);
+    font-family: var(--font-family);
     background-color: var(--background-color);
 }
 h1, h2, h3 {
