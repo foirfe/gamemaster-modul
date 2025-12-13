@@ -181,3 +181,12 @@ export function upsertSearchRadius(lat, lng, radiusMeters) {
         radius: Number(radiusMeters)
     }).addTo(map);
 }
+
+//clearsearchradius
+export function clearSearchRadius() {
+    if (!map) return;
+    if (searchRadiusCircle) {
+        map.removeLayer(searchRadiusCircle);
+        searchRadiusCircle = null;
+    }
+}

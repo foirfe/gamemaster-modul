@@ -1,5 +1,5 @@
 //Main // test
-import { initMap, upsertSearchRadius , upsertTaskCircle, removeTaskCircle, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
+import { initMap, clearSearchRadius , upsertSearchRadius , upsertTaskCircle, removeTaskCircle, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
 import { Scenario, Task, Option } from './models.js';
 import {  saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
 import { renderDashboard } from './ui-manager.js';
@@ -9,10 +9,12 @@ const radiusInput = document.getElementById("nearby-radius");
 const radiusValue = document.getElementById("nearby-radius-value");
 const btnNearby = document.getElementById("btn-filter-nearby");
 const btnReset = document.getElementById("btn-filter-reset");
+const radiusWrapper = document.getElementById("search-radius-wrapper");
 let manualLocationOverride = false;
 let manualLatLng = null;
 let lastGpsLatLng = null; 
 let hasCenteredOnce = false;
+let nearbyFilterEnabled = false; // default OFF (vis alle opgaver)
 
 
 if (radiusInput && radiusValue) {
@@ -22,30 +24,10 @@ if (radiusInput && radiusValue) {
         radiusValue.textContent = `${radiusInput.value} m`;
         currentRadiusMeters = Number(radiusInput.value);
 
-        // Hvis vi allerede har en filter-lokation, opdater søgecirkel + filter live
-        if (currentFilterLatLng) {
+        if (nearbyFilterEnabled && currentFilterLatLng) {
             upsertSearchRadius(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
             applyNearbyFilter(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
         }
-    });
-}
-
-if (btnNearby) {
-    btnNearby.addEventListener("click", () => {
-        if (!currentFilterLatLng) {
-            alert("Flyt lokationsmarkøren eller vent på GPS, før du filtrerer.");
-            return;
-        }
-        upsertSearchRadius(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
-        applyNearbyFilter(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
-    });
-}
-
-if (btnReset) {
-    btnReset.addEventListener("click", () => {
-        filteredTasks = null;
-        currentFilterLatLng = null;
-        renderTaskList();
     });
 }
 
@@ -59,8 +41,6 @@ window.handleDeleteScenario = (id) => {
         }
     }
 };
-
-
 
 
 
@@ -98,35 +78,46 @@ function switchView(viewName) {
 
 window.addEventListener("userLocationMoved", (e) => {
     const { lat, lng } = e.detail;
-    console.log("Brugeren flyttede lokation til:", lat, lng);
 
-    // Her kan du senere filtrere opgaver i nærheden
-    // fx filterTasksNear(lat, lng, 5000);
-});
+    manualLocationOverride = true;
+    manualLatLng = { lat, lng };
+    currentFilterLatLng = { lat, lng };
 
-document.getElementById('btn-create-new').addEventListener('click', async () => {
-    hasCenteredOnce = false;       // ✅ gør at den centrér første gang igen
-    manualLocationOverride = false; // (valgfrit) start “følg GPS”
-    manualLatLng = null;
-
-    switchView('editor');
-    initMap('map-container');
-    resetEditor();
-
-    navigator.geolocation.watchPosition(onPositionUpdate, console.error, {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 15000
-    });
-
-    await loadTasks();
-    renderTaskList();
+    // ✅ kun filtrér live hvis filter er slået til
+    if (nearbyFilterEnabled) {
+        upsertSearchRadius(lat, lng, currentRadiusMeters);
+        applyNearbyFilter(lat, lng, currentRadiusMeters);
+    }
 });
 
 document.getElementById('btn-back').addEventListener('click', () => {
     switchView('dashboard');
 });
 
+if (btnReset) {
+    btnReset.addEventListener("click", () => {
+        // Slå filter fra
+        nearbyFilterEnabled = false;
+        filteredTasks = null;
+
+        // Reset "Vis opgaver i nærheden"-knappen
+        if (btnNearby) {
+            btnNearby.classList.remove("is-active");
+            btnNearby.textContent = "VIS OPGAVER I NÆRHEDEN";
+        }
+
+        // SKJUL radius-slideren
+        if (radiusWrapper) {
+            radiusWrapper.classList.add("hidden");
+        }
+
+        // Fjern radius-cirkel på kortet
+        clearSearchRadius();
+
+        // Vis alle opgaver igen
+        renderTaskList();
+    });
+}
 
 
 
@@ -418,18 +409,6 @@ function applyNearbyFilter(lat, lng, radiusMeters) {
     renderTaskList(); // bruger filteredTasks hvis den findes
 }
 
-
-window.addEventListener("userLocationMoved", (e) => {
-    const { lat, lng } = e.detail;
-
-    manualLocationOverride = true;
-    manualLatLng = { lat, lng };
-
-    currentFilterLatLng = { lat, lng };
-    upsertSearchRadius(lat, lng, currentRadiusMeters);
-    applyNearbyFilter(lat, lng, currentRadiusMeters);
-});
-
 const btnLocationReset = document.getElementById("btn-location-reset");
 
 if (btnLocationReset) {
@@ -442,15 +421,76 @@ if (btnLocationReset) {
             return;
         }
 
-        // Sæt filter-lokation tilbage til GPS
         currentFilterLatLng = { ...lastGpsLatLng };
-
-        // Opdatér søgecirkel + liste
-        upsertSearchRadius(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
-        applyNearbyFilter(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
 
         // Flyt markør + kort til GPS igen
         upsertUserLocation(currentFilterLatLng.lat, currentFilterLatLng.lng, null);
         centerMapOnLocation(currentFilterLatLng.lat, currentFilterLatLng.lng, 15);
+
+        // ✅ Kun hvis filter er slået til
+        if (nearbyFilterEnabled) {
+            upsertSearchRadius(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
+            applyNearbyFilter(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
+        } else {
+            // Filter er slået fra => vis alle + ingen radiuscirkel
+            filteredTasks = null;
+            renderTaskList();
+            clearSearchRadius();
+        }
+    });
+}
+
+
+document.getElementById('btn-create-new').addEventListener('click', async () => {
+    hasCenteredOnce = false;
+    manualLocationOverride = false;
+    manualLatLng = null;
+
+    switchView('editor');
+    initMap('map-container');
+    resetEditor();
+
+    navigator.geolocation.watchPosition(onPositionUpdate, console.error, {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 15000
+    });
+
+    await loadTasks();
+    renderTaskList();
+});
+
+if (btnNearby) {
+    btnNearby.addEventListener("click", () => {
+        nearbyFilterEnabled = !nearbyFilterEnabled;
+
+        btnNearby.classList.toggle("is-active", nearbyFilterEnabled);
+        btnNearby.textContent = nearbyFilterEnabled
+            ? "VIS OPGAVER I NÆRHEDEN ✓"
+            : "VIS OPGAVER I NÆRHEDEN";
+
+        // ✅ vis/skjul slider UI
+        if (radiusWrapper) {
+            radiusWrapper.classList.toggle("hidden", !nearbyFilterEnabled);
+        }
+
+        if (nearbyFilterEnabled && !currentFilterLatLng) {
+            alert("Flyt lokationsmarkøren eller vent på GPS, før du filtrerer.");
+            nearbyFilterEnabled = false;
+
+            btnNearby.classList.remove("is-active");
+            btnNearby.textContent = "VIS OPGAVER I NÆRHEDEN";
+            if (radiusWrapper) radiusWrapper.classList.add("hidden");
+            return;
+        }
+
+        if (nearbyFilterEnabled) {
+            upsertSearchRadius(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
+            applyNearbyFilter(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
+        } else {
+            filteredTasks = null;
+            renderTaskList();
+            clearSearchRadius();
+        }
     });
 }

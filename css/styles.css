@@ -31,3 +31,7 @@ h1{
 .view-active {
     display: block; /* Eller grid/flex afhængigt af layout */
 }
+
+.hidden {
+    display: none;
+}

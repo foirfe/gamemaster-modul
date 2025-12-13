@@ -35,6 +35,7 @@
                         upload
                     </span>
                 </button>
+
                 <label for="scenario-name">Scenarie</label>
                 <input type="text" id="scenario-name" placeholder="Skriv scenarie navn">
                 <div class="scenario-desc-container">
@@ -47,11 +48,18 @@
                     <option value="land">Land</option>
                     <option value="vand">Vand</option>
                 </select>
-                <label for="nearby-radius">Søgeradius (Meter)</label>
-                <input id="nearby-radius" type="range" min="250" max="20000" step="250" value="5000">
-                <div id="nearby-radius-value">5000 m</div>
+
+
+
                 <button id="btn-filter-nearby">Vis opgaver i nærheden</button>
+
+                <div id="search-radius-wrapper" class="hidden">
+                    <label for="nearby-radius">Søgeradius -</label> <label id="nearby-radius-value">5000 m</label>
+                    <input id="nearby-radius" type="range" min="250" max="20000" step="250" value="5000">                 
+                </div>
+
                 <button id="btn-location-reset">Nulstil placering (GPS)</button>
+
                 <h3>Tilgængelige opgaver</h3>
                 <button id="btn-filter-reset">Vis alle opgaver</button>
                 <div id="div-task-list" class="scrollable-list">
