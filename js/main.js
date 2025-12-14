@@ -1,10 +1,14 @@
 //Main // test
 import { initMap, clearAllTaskLayers, clearSearchRadius , upsertSearchRadius , upsertTaskCircle, removeTaskCircle, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
 import { Scenario, Task, Option } from './models.js';
-import {  saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
+import {  readJSONFile, saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
 import { renderDashboard } from './ui-manager.js';
 
 
+const btnImportDashboard = document.getElementById('btn-import-scenarios');
+const fileInputImport = document.getElementById('import-file-input');
+const btnImportTasks = document.getElementById('btn-import');
+const fileInputTasks = document.getElementById('task-file-input');
 const radiusInput = document.getElementById("nearby-radius");
 const radiusValue = document.getElementById("nearby-radius-value");
 const btnNearby = document.getElementById("btn-filter-nearby");
@@ -16,6 +20,92 @@ let lastGpsLatLng = null;
 let hasCenteredOnce = false;
 let nearbyFilterEnabled = false; // default OFF (vis alle opgaver)
 
+// --- IMPORT AF SCENARIER (Dashboard) ---
+if (btnImportDashboard && fileInputImport) {
+    btnImportDashboard.addEventListener('click', () => {
+        fileInputImport.click();
+    });
+
+    fileInputImport.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        readJSONFile(file, (importedData) => {
+            const newScenarios = Array.isArray(importedData) ? importedData : [importedData];
+            let addedCount = 0;
+            let updatedCount = 0;
+            let invalidCount = 0;
+            // Hent nuværende scenarier for at kunne tjekke om de findes
+            const currentScenarios = getScenariosFromStorage();
+            newScenarios.forEach(scenario => {
+                // 1. VALIDERING: Er det overhovedet et scenarie?
+                // Vi tjekker om de vigtigste felter findes.
+                if (!scenario.scenarioId || !scenario.scenarioTitle) {
+                    invalidCount++;
+                    return; // Spring over denne
+                }
+                // TJEK: Findes det allerede?
+                const exists = currentScenarios.some(s => s.scenarioId === scenario.scenarioId);
+                if (exists) {
+                    updatedCount++;
+                } else {
+                    addedCount++;
+                }
+                // GEM
+                saveScenarioToStorage(scenario);
+            });
+            updateDashboardView();
+            // FEEDBACK BESKED
+            let msg = `Import færdig!\n`;
+            if (addedCount > 0) msg += `- Oprettet: ${addedCount}\n`;
+            if (updatedCount > 0) msg += `- Opdateret: ${updatedCount}\n`;
+            if (invalidCount > 0) msg += `- Fejlede/Ugyldige: ${invalidCount}\n(Forkert format?)`;
+            if (addedCount === 0 && updatedCount === 0) {
+                 msg = "Ingen gyldige scenarier fundet i filen.";
+            }
+            alert(msg);
+            fileInputImport.value = ''; 
+        });
+    });
+}
+// IMPORT AF OPGAVER
+if (btnImportTasks && fileInputTasks) {
+    btnImportTasks.addEventListener('click', () => {
+        fileInputTasks.click();
+    });
+    fileInputTasks.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        readJSONFile(file, (importedData) => {
+            const newTasks = Array.isArray(importedData) ? importedData : [importedData];
+            let addedCount = 0;
+            let updatedCount = 0;
+            let invalidCount = 0;
+            newTasks.forEach(newTask => {
+                // VALIDERING: Er det faktisk en opgave?
+                if (newTask.ID === undefined || !newTask.Titel) {
+                    invalidCount++;
+                    return; // Spring over
+                }
+                const existingIndex = allTasks.findIndex(t => t.ID === newTask.ID);
+                if (existingIndex !== -1) {
+                    allTasks[existingIndex] = newTask;
+                    updatedCount++;
+                } else {
+                    allTasks.push(newTask);
+                    addedCount++;
+                }
+            });
+            renderTaskList();
+            // FEEDBACK BESKED
+            let msg = `Opgave import færdig!\n`;
+            if (addedCount > 0) msg += `- Nye tilføjet: ${addedCount}\n`;
+            if (updatedCount > 0) msg += `- Opdateret: ${updatedCount}\n`;
+            if (invalidCount > 0) msg += `- Ugyldige data: ${invalidCount}\n(Du har nok valgt en forkert fil)`;
+            alert(msg);
+            fileInputTasks.value = '';
+        });
+    });
+}
 
 if (radiusInput && radiusValue) {
     radiusValue.textContent = `${radiusInput.value} m`;
@@ -293,7 +383,6 @@ function resetEditor() {
     currentScenario.scenarioId = "S" + Date.now(); 
     currentScenario.scenarioCreatedBy = "Gamemaster"; // Her kunne der være en dynamisk bruger med auth.
     selectedTasks = [];
-    filteredTasks = null;
     // Nulstil UI felter
     document.getElementById('scenario-name').value = "";
     document.getElementById('scenario-type').value = "choose";
@@ -310,7 +399,6 @@ export async function editScenario(id) {
         console.error("Scenarie ikke fundet:", id);
         return;
     }
-    filteredTasks = null;
     // Sæt currentScenario til det fundne
     currentScenario = foundScenario;
 

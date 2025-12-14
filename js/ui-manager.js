@@ -62,15 +62,19 @@ export function renderDashboard(scenarios) {
         li.appendChild(btnsContainer);
         ul.appendChild(li);
     });
-
     // Opretter "Download JSON" knap som det sidste element
     const downloadLi = document.createElement('li');
     downloadLi.className = 'scenario-item download-card';
-
     const downloadBtn = document.createElement('button');
     downloadBtn.textContent = 'Download JSON';
     downloadBtn.onclick = () => {
-        downloadJSON("Scenarios.json", localStorage.getItem('gamemaster_scenarios'));
+        const rawData = localStorage.getItem('gamemaster_scenarios');
+        if (rawData) {
+            // Vi laver teksten om til rigtige objekter og stringifyer det
+            const parsedData = JSON.parse(rawData);
+            const prettyData = JSON.stringify(parsedData, null, 2);
+            downloadJSON("Scenarios.json", prettyData);
+        }
     };
     downloadLi.appendChild(downloadBtn);
     ul.appendChild(downloadLi);

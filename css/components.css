@@ -19,9 +19,11 @@ button {
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.25);
     }
 }
+.btn-primary{
+        padding: 1% 2.5%;
+}
 #btn-create-new{
     margin: 2% 5% 0 0;
-    padding: 1% 2.5%;
 }
 .scenario-list-and-btn{
 display: flex;
