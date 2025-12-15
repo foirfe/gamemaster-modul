@@ -45,12 +45,6 @@
                     <label for="scenario-desc">Beskrivelse</label>
                     <textarea id="scenario-desc" placeholder="Skriv beskrivelse"> </textarea>
                 </div>
-                <label for="scenario-type">Type</label>
-                <select name="type" id="scenario-type">
-                    <option value="choose">Vælg én</option>
-                    <option value="land">Land</option>
-                    <option value="vand">Vand</option>
-                </select>
 
 
 
@@ -64,7 +58,12 @@
                 
 
                 <h3>Tilgængelige opgaver</h3>
-                <button id="btn-filter-reset">Vis alle opgaver</button>
+                <label for="scenario-type">Filtrer efter type</label>
+<select name="type" id="scenario-type">
+    <option value="alle">Alle</option>
+    <option value="Land">Land</option>
+    <option value="Vand">Vand</option>
+</select>
                 <div id="div-task-list" class="scrollable-list">
                     <ul id="task-list" class="task-list"></ul>
                 </div>

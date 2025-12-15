@@ -66,6 +66,10 @@ export function renderDashboard(scenarios) {
     const downloadLi = document.createElement('li');
     downloadLi.className = 'scenario-item download-card';
     const downloadBtn = document.createElement('button');
+    const date = new Date();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear()).slice(-2);
     downloadBtn.textContent = 'Download JSON';
     downloadBtn.onclick = () => {
         const rawData = localStorage.getItem('gamemaster_scenarios');
@@ -73,7 +77,7 @@ export function renderDashboard(scenarios) {
             // Vi laver teksten om til rigtige objekter og stringifyer det
             const parsedData = JSON.parse(rawData);
             const prettyData = JSON.stringify(parsedData, null, 2);
-            downloadJSON("Scenarios.json", prettyData);
+            downloadJSON(`Scenarios-${day}-${month}-${year}.json`, prettyData);
         }
     };
     downloadLi.appendChild(downloadBtn);

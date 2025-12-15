@@ -3,7 +3,7 @@ export class Scenario {
         this.scenarioId = "";
         this.scenarioTitle = "";
         this.scenarioDescription = "";
-        this.scenarioEnvironment = "";   // "land" eller "sø"
+        this.scenarioEnvironment = "";   // "land" eller "sï¿½"
         this.scenarioCreatedBy = "";
         this.scenarioCreatedTime = new Date();
         this.scenarioIsActive = true;
@@ -19,6 +19,7 @@ export class Task {
         this.taskId = "";                 // ID fra Team 1
         this.taskTitle = "";
         this.taskDescription = "";
+        this.taskType = "";
         this.orderNumber = 0;
         this.mapType = "";                // "zone" eller "punkt"
         this.mapRadiusInMeters = 0;
