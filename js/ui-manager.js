@@ -44,14 +44,26 @@ function renderDashboard(scenarios) {
         btnsContainer.className = 'btns-container';
         // REDIGER
         const editBtn = document.createElement('button');
-        editBtn.textContent = `Rediger`;
+        editBtn.className = 'btn-scenario';
+        const editTextNode = document.createTextNode('Redigere ');
+        const editIconSpan = document.createElement('span');
+        editIconSpan.className = 'material-symbols-outlined';
+        editIconSpan.textContent = 'edit_document';
         editBtn.setAttribute('aria-label', `Rediger scenariet: ${scenario.scenarioTitle}`);
+        editBtn.appendChild(editTextNode);
+        editBtn.appendChild(editIconSpan);
         editBtn.onclick = (e) => {
             if (typeof window.editScenario === 'function') window.editScenario(scenario.scenarioId);
         };
         // SLET
         const deleteScenarioBtn = document.createElement('button');
-        deleteScenarioBtn.textContent = `Slet`;
+        deleteScenarioBtn.className = 'btn-scenario';
+        const deleteScenarioTextNode = document.createTextNode('Slet ');
+        const deleteScenarioIconSpan = document.createElement('span');
+        deleteScenarioIconSpan.className = 'material-symbols-outlined';
+        deleteScenarioIconSpan.textContent = 'delete';
+        deleteScenarioBtn.appendChild(deleteScenarioTextNode);
+        deleteScenarioBtn.appendChild(deleteScenarioIconSpan);
         deleteScenarioBtn.setAttribute('aria-label', `Slet scenariet: ${scenario.scenarioTitle}`);
         deleteScenarioBtn.onclick = (e) => {
             if (typeof window.handleDeleteScenario === 'function') window.handleDeleteScenario(scenario.scenarioId);
@@ -68,11 +80,15 @@ function renderDashboard(scenarios) {
     const downloadLi = document.createElement('li');
     downloadLi.className = 'scenario-item download-card';
     const downloadBtn = document.createElement('button');
+    downloadBtn.className = `btn-download`;
+    const downloadTextNode = document.createTextNode('Download JSON ');
+    const downloadIconSpan = document.createElement('span');
+    downloadIconSpan.className = 'material-symbols-outlined';
+    downloadIconSpan.textContent = 'download'; // Ikonnavnet
     const date = new Date();
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = String(date.getFullYear()).slice(-2);
-    downloadBtn.textContent = 'Download JSON';
     downloadBtn.onclick = () => {
         const rawData = localStorage.getItem('gamemaster_scenarios');
         if (rawData) {
@@ -82,6 +98,8 @@ function renderDashboard(scenarios) {
             downloadJSON(`Scenarios-${day}-${month}-${year}.json`, prettyData);
         }
     };
+    downloadBtn.appendChild(downloadTextNode);
+    downloadBtn.appendChild(downloadIconSpan);
     downloadLi.appendChild(downloadBtn);
     ul.appendChild(downloadLi);
     listContainer.appendChild(ul);
