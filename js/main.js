@@ -2,7 +2,7 @@
 import { initMap, clearAllTaskLayers, clearSearchRadius , upsertSearchRadius , upsertTaskCircle, removeTaskCircle, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
 import { Scenario, Task } from './models.js';
 import {  readJSONFile, saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
-import { renderDashboard } from './ui-manager.js';
+import { updateDashboardView } from './ui-manager.js';
 
 
 const btnImportDashboard = document.getElementById('btn-import-scenarios');
@@ -136,11 +136,6 @@ window.handleDeleteScenario = (id) => {
 
 
 
-function updateDashboardView() {
-    const allScenarios = getScenariosFromStorage();
-    const activeScenarios = allScenarios.filter(s => s.scenarioIsActive !== false);
-    renderDashboard(activeScenarios);
-}
 // Kaldes når siden loader
 updateDashboardView();
 // Globale variabler til editoren

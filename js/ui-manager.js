@@ -1,7 +1,7 @@
 //UI MANAGER
-import { downloadJSON } from './data-manager.js';
+import { downloadJSON, getScenariosFromStorage } from './data-manager.js';
 // Renderer listen af scenarier på dashboardet.
-export function renderDashboard(scenarios) {
+function renderDashboard(scenarios) {
     const listContainer = document.getElementById('scenario-list');
     
     // Ryd listen sikkert
@@ -84,3 +84,10 @@ export function renderDashboard(scenarios) {
     ul.appendChild(downloadLi);
     listContainer.appendChild(ul);
 }
+
+export function updateDashboardView() {
+    const allScenarios = getScenariosFromStorage();
+    const activeScenarios = allScenarios.filter(s => s.scenarioIsActive !== false);
+    renderDashboard(activeScenarios);
+}
+
