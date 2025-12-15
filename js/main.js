@@ -1,8 +1,8 @@
 //Main // test
-import { initMap, clearAllTaskLayers, clearSearchRadius , upsertSearchRadius , upsertTaskCircle, removeTaskCircle, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
-import { Scenario, Task } from './models.js';
+import { initMap, clearSearchRadius, upsertSearchRadius, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
+import { Scenario } from './models.js';
 import {  readJSONFile, saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
-import { updateDashboardView } from './ui-manager.js';
+import { updateDashboardView, renderTaskList, updateTaskSelectionUIAndMap, mapTasksToScenario } from './ui-manager.js';
 
 
 const btnImportDashboard = document.getElementById('btn-import-scenarios');
@@ -12,13 +12,16 @@ const fileInputTasks = document.getElementById('task-file-input');
 const radiusInput = document.getElementById("nearby-radius");
 const radiusValue = document.getElementById("nearby-radius-value");
 const btnNearby = document.getElementById("btn-filter-nearby");
-
 const radiusWrapper = document.getElementById("search-radius-wrapper");
 let manualLocationOverride = false;
 let manualLatLng = null;
 let lastGpsLatLng = null; 
 let hasCenteredOnce = false;
 let nearbyFilterEnabled = false; // default OFF (vis alle opgaver)
+let currentScenario = new Scenario(); 
+let selectedTasks = []; 
+let allTasks = [];
+
 
 // --- IMPORT AF SCENARIER (Dashboard) ---
 if (btnImportDashboard && fileInputImport) {
@@ -97,7 +100,7 @@ if (btnImportTasks && fileInputTasks) {
             });
             filteredTasks = null;
             document.getElementById('scenario-type').value = "alle";
-            renderTaskList();
+            refreshTaskListUI();
             // FEEDBACK BESKED
             let msg = `Opgave import færdig!\n`;
             if (addedCount > 0) msg += `- Nye tilføjet: ${addedCount}\n`;
@@ -138,10 +141,6 @@ window.handleDeleteScenario = (id) => {
 
 // Kaldes når siden loader
 updateDashboardView();
-// Globale variabler til editoren
-let currentScenario = new Scenario(); 
-let selectedTasks = []; 
-let allTasks = [];
 
 //Navigation
 const dashboardView = document.getElementById('view-dashboard');
@@ -181,8 +180,27 @@ document.getElementById('btn-back').addEventListener('click', () => {
     switchView('dashboard');
 });
 
+function handleTaskToggle(taskClicked) {
+    const existingIndex = selectedTasks.findIndex(t => t.ID === taskClicked.ID);
+    if (existingIndex === -1) {
+        // Tilføj
+        selectedTasks.push(taskClicked);
+    } else {
+        // Fjern
+        selectedTasks.splice(existingIndex, 1);
+        // Vi behøver ikke kalde removeTaskCircle manuelt her, 
+        // da updateTaskSelectionUIAndMap rydder og gentegner alt.
+    }
+    // Kald UI opdatering (i ui-manager) med den nye state
+    updateTaskSelectionUIAndMap(selectedTasks);
+}
 
-
+function refreshTaskListUI() {
+    // Bestem hvilke tasks der skal vises
+    const tasksToShow = filteredTasks ?? allTasks;
+    // Kald render funktionen fra ui-manager med DATA og CALLBACK
+    renderTaskList(tasksToShow, selectedTasks, handleTaskToggle);
+}
 
 // Hent tasks fra JSON-filen
 async function loadTasks() {
@@ -211,168 +229,6 @@ if (typeSelect) {
     });
 }
 
-// Tegn listen i sidebar
-function renderTaskList() {
-    const listEl = document.getElementById('task-list');
-    if (!listEl) return;
-   listEl.replaceChildren();
-
-    // Brug filteredTasks hvis vi har filter aktivt, ellers allTasks
-    const tasksToShow = filteredTasks ?? allTasks;
-
-    tasksToShow.forEach(teamTask => {
-        // 1. Opret hovedelementet (LI)
-        const li = document.createElement('li');
-        li.classList.add('task-item');
-        li.dataset.taskId = teamTask.ID;
-
-        // 2. Opret containeren til indholdet
-        const contentDiv = document.createElement('div');
-        contentDiv.classList.add('task-item-content');
-
-        // 3. Opret tekst-gruppen (venstre side)
-        const textGroupDiv = document.createElement('div');
-
-        // --- TITEL LINJE ---
-        const titleDiv = document.createElement('div');
-        titleDiv.classList.add('task-item-title');
-
-        // Ikon logik:
-        const iconSpan = document.createElement('span');
-        iconSpan.classList.add('material-symbols-outlined');
-        iconSpan.style.verticalAlign = 'middle'; 
-        iconSpan.style.marginRight = '5px';
-        iconSpan.style.fontSize = '18px';
-        if (teamTask.Type === 'Land') {
-            iconSpan.style.color = `var(--military-green)`
-            iconSpan.textContent = 'forest';
-        } else {
-            iconSpan.style.color = `var(--navy-blue)`
-            iconSpan.textContent = 'sailing'; 
-        }
-        // Selve teksten til titlen
-        // Vi bruger createTextNode for at kunne lægge den ved siden af ikonet
-        const titleText = document.createTextNode(
-            `${teamTask.ID} - ${teamTask.Titel} ${teamTask.taskTypeLabel || ''}`
-        );
-        // Saml titlen (Ikon + Tekst)
-        titleDiv.appendChild(titleText);
-        titleDiv.appendChild(iconSpan);
-
-        // --- BESKRIVELSE ---
-        const descDiv = document.createElement('div');
-        descDiv.classList.add('task-item-desc');
-        descDiv.textContent = teamTask.Beskrivelse; // Sikker indsættelse af tekst
-
-        // Saml venstre side
-        textGroupDiv.appendChild(titleDiv);
-        textGroupDiv.appendChild(descDiv);
-        // 4. Opret Badge (højre side)
-        const badgeDiv = document.createElement('div');
-        badgeDiv.classList.add('task-order-badge');
-        // 5. Saml hele "content" div'en
-        contentDiv.appendChild(textGroupDiv);
-        contentDiv.appendChild(badgeDiv);
-        li.appendChild(contentDiv);
-        // 6. Håndter selection logic (uændret logik, men på det nye element)
-        const isSelected = selectedTasks.some(t => t.ID === teamTask.ID);
-        if (isSelected) li.classList.add('task-item-selected');
-        const index = selectedTasks.findIndex(t => t.ID === teamTask.ID);
-        if (index !== -1) {
-        badgeDiv.textContent = index + 1; // Sætter tallet (f.eks. "1" eller "2")
-        }
-        li.addEventListener('click', () => {
-            const existingIndex = selectedTasks.findIndex(t => t.ID === teamTask.ID);
-            if (existingIndex === -1) {
-                // Ikke valgt endnu → tilføj
-                selectedTasks.push(teamTask);
-            } else {
-                // Allerede valgt → fjern
-                selectedTasks.splice(existingIndex, 1);
-                // Fjern cirkel fra kortet for den task
-                if (typeof removeTaskCircle === 'function') {
-                    removeTaskCircle(teamTask.ID);
-                }
-            }
-            // Efter vi har opdateret selectedTasks, opdaterer vi UI
-            updateTaskSelectionUIAndMap();
-        });
-
-        // Tilføj til listen i DOM'en
-        listEl.appendChild(li);
-    });
-}
-
-function updateTaskSelectionUIAndMap() {
-    const listEl = document.getElementById('task-list');
-    if (!listEl) return;
-
-    // Ryd ALLE task-lag på kortet først (så gamle prikker ikke bliver hængende)
-    clearAllTaskLayers();
-
-    // Nulstil alle badges + selected-styles i listen
-    const allLis = listEl.querySelectorAll('.task-item');
-
-    allLis.forEach(li => {
-        li.classList.remove('task-item-selected');
-
-        const badge = li.querySelector('.task-order-badge');
-        if (badge) badge.textContent = "";
-    });
-
-    // Gå valgte tasks igennem (i rækkefølge) og opdatér både liste + kort
-    selectedTasks.forEach((t, index) => {
-        const orderNumber = index + 1;
-
-        // --- LISTE: marker + nummer badge ---
-        const li = listEl.querySelector(`li[data-task-id="${t.ID}"]`);
-        if (li) {
-            li.classList.add('task-item-selected');
-
-            const badge = li.querySelector('.task-order-badge');
-            if (badge) badge.textContent = orderNumber;
-        }
-
-        // --- KORT: tegn marker + evt. radius ---
-        if (Array.isArray(t.Lokation) && t.Lokation.length >= 2) {
-            const lat = Number(t.Lokation[0]);
-            const lng = Number(t.Lokation[1]);
-            const radius = Number(t.Radius ?? 0);
-
-            upsertTaskCircle(t.ID, lat, lng, radius, orderNumber);
-        }
-    });
-}
-
-
-//render tasknames
-function mapTasksToScenario(teamTask, index) {
-    const task = new Task();
-
-    task.idT = index + 1;
-    task.orderNumber = index + 1;
-
-    task.taskId = `T${teamTask.ID}`;
-    task.taskTitle = teamTask.Titel ?? "";
-    task.taskDescription = teamTask.Beskrivelse ?? "";
-    task.taskTypeLabel = `` ?? "Ingen ikon"
-    task.taskType = teamTask.Type ?? "";
-
-    // Aktiveringsbetingelse: "Zone" -> zone, "Lokalitet" -> punkt
-    const act = (teamTask.Aktiveringsbetingelse ?? "").toLowerCase();
-    task.mapType = act === "zone" ? "zone" : "punkt";
-
-    task.mapRadiusInMeters = Number(teamTask.Radius ?? 0);
-
-    // Lokation: [lat, lng]
-    if (Array.isArray(teamTask.Lokation) && teamTask.Lokation.length >= 2) {
-        task.mapLat = Number(teamTask.Lokation[0]);
-        task.mapLng = Number(teamTask.Lokation[1]);
-    }
-    task.mapLabel = `OP${index + 1}`;
-    task.isActive = false;
-    return task;
-}
 
 
 // "Gem" knap logic
@@ -419,8 +275,9 @@ function resetEditor() {
     document.getElementById('scenario-type').value = "alle";
     document.getElementById('scenario-desc').value = "";
     filteredTasks = null;
-    updateTaskSelectionUIAndMap();
+    updateTaskSelectionUIAndMap(selectedTasks); 
 }
+
 
 // Funktion til at indlæse et EKSISTERENDE scenarie 
 export async function editScenario(id) {
@@ -475,8 +332,8 @@ export async function editScenario(id) {
     });
 
    filteredTasks = null; 
-    renderTaskList();
-    updateTaskSelectionUIAndMap();
+    renderTaskList(filteredTasks || allTasks, selectedTasks, handleTaskToggle);
+    updateTaskSelectionUIAndMap(selectedTasks);
 }
 
 
@@ -535,6 +392,7 @@ function runTaskFilters() {
     // 1. Start med alle tasks
     let tempTasks = allTasks;
 
+
     // 2. Filtrer på Type (hvis andet end "alle" er valgt)
     const typeSelect = document.getElementById('scenario-type');
     if (typeSelect && typeSelect.value !== 'alle') {
@@ -559,7 +417,7 @@ function runTaskFilters() {
     // Hvis vi viser "Alle" uden radius filter, er filteredTasks egentlig bare allTasks,
     // men for at renderTaskList ved hvad den skal bruge, sætter vi den her.
     filteredTasks = tempTasks;
-    renderTaskList();
+    renderTaskList(filteredTasks, selectedTasks, handleTaskToggle);
 }
 
 // Opdateret applyNearbyFilter (bruges af GPS/Radius logik)
@@ -595,7 +453,7 @@ if (btnLocationReset) {
         } else {
             // Filter er slået fra => vis alle + ingen radiuscirkel
             filteredTasks = null;
-            renderTaskList();
+           refreshTaskListUI();
             clearSearchRadius();
         }
     });
@@ -618,7 +476,7 @@ document.getElementById('btn-create-new').addEventListener('click', async () => 
     });
 
     await loadTasks();
-    renderTaskList();
+    refreshTaskListUI();
 });
 
 if (btnNearby) {
@@ -650,7 +508,7 @@ if (btnNearby) {
             applyNearbyFilter(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
         } else {
             filteredTasks = null;
-            renderTaskList();
+            refreshTaskListUI();
             clearSearchRadius();
         }
     });

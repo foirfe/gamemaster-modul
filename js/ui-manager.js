@@ -1,5 +1,7 @@
 //UI MANAGER
 import { downloadJSON, getScenariosFromStorage } from './data-manager.js';
+import { clearAllTaskLayers, upsertTaskCircle } from './map-manager.js'; 
+import { Task } from './models.js';
 // Renderer listen af scenarier på dashboardet.
 function renderDashboard(scenarios) {
     const listContainer = document.getElementById('scenario-list');
@@ -91,3 +93,125 @@ export function updateDashboardView() {
     renderDashboard(activeScenarios);
 }
 
+export function mapTasksToScenario(teamTask, index) {
+    const task = new Task();
+    task.idT = index + 1;
+    task.orderNumber = index + 1;
+    task.taskId = `T${teamTask.ID}`;
+    task.taskTitle = teamTask.Titel ?? "";
+    task.taskDescription = teamTask.Beskrivelse ?? "";
+    task.taskTypeLabel = `` ?? "Ingen ikon";
+    task.taskType = teamTask.Type ?? "";
+    const act = (teamTask.Aktiveringsbetingelse ?? "").toLowerCase();
+    task.mapType = act === "zone" ? "zone" : "punkt";
+    task.mapRadiusInMeters = Number(teamTask.Radius ?? 0);
+    if (Array.isArray(teamTask.Lokation) && teamTask.Lokation.length >= 2) {
+        task.mapLat = Number(teamTask.Lokation[0]);
+        task.mapLng = Number(teamTask.Lokation[1]);
+    }
+    task.mapLabel = `OP${index + 1}`;
+    task.isActive = false;
+    return task;
+}
+
+
+export function updateTaskSelectionUIAndMap(selectedTasks) {
+    const listEl = document.getElementById('task-list');
+    if (!listEl) return;
+    // Ryd ALLE task-lag på kortet først
+    clearAllTaskLayers();
+    // Nulstil alle badges + selected-styles i listen
+    const allLis = listEl.querySelectorAll('.task-item');
+    allLis.forEach(li => {
+        li.classList.remove('task-item-selected');
+        const badge = li.querySelector('.task-order-badge');
+        if (badge) badge.textContent = "";
+    });
+    // Gå valgte tasks igennem og opdatér liste + kort
+    selectedTasks.forEach((t, index) => {
+        const orderNumber = index + 1;
+        // --- LISTE ---
+        const li = listEl.querySelector(`li[data-task-id="${t.ID}"]`);
+        if (li) {
+            li.classList.add('task-item-selected');
+            const badge = li.querySelector('.task-order-badge');
+            if (badge) badge.textContent = orderNumber;
+        }
+        // --- KORT ---
+        if (Array.isArray(t.Lokation) && t.Lokation.length >= 2) {
+            const lat = Number(t.Lokation[0]);
+            const lng = Number(t.Lokation[1]);
+            const radius = Number(t.Radius ?? 0);
+            upsertTaskCircle(t.ID, lat, lng, radius, orderNumber);
+        }
+    });
+}
+
+
+export function renderTaskList(tasksToShow, selectedTasks, onTaskToggleCallback) {
+    const listEl = document.getElementById('task-list');
+    if (!listEl) return;
+    listEl.replaceChildren();
+
+    tasksToShow.forEach(teamTask => {
+        const li = document.createElement('li');
+        li.classList.add('task-item');
+        li.dataset.taskId = teamTask.ID;
+
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('task-item-content');
+
+        const textGroupDiv = document.createElement('div');
+        const titleDiv = document.createElement('div');
+        titleDiv.classList.add('task-item-title');
+
+        const iconSpan = document.createElement('span');
+        iconSpan.classList.add('material-symbols-outlined');
+        iconSpan.style.verticalAlign = 'middle'; 
+        iconSpan.style.marginRight = '5px';
+        iconSpan.style.fontSize = '18px';
+        
+        if (teamTask.Type === 'Land') {
+            iconSpan.style.color = `var(--military-green)`;
+            iconSpan.textContent = 'forest';
+        } else {
+            iconSpan.style.color = `var(--navy-blue)`;
+            iconSpan.textContent = 'sailing'; 
+        }
+
+        const titleText = document.createTextNode(
+            `${teamTask.ID} - ${teamTask.Titel} ${teamTask.taskTypeLabel || ''}`
+        );
+        titleDiv.appendChild(titleText);
+        titleDiv.appendChild(iconSpan);
+
+        const descDiv = document.createElement('div');
+        descDiv.classList.add('task-item-desc');
+        descDiv.textContent = teamTask.Beskrivelse;
+
+        textGroupDiv.appendChild(titleDiv);
+        textGroupDiv.appendChild(descDiv);
+
+        const badgeDiv = document.createElement('div');
+        badgeDiv.classList.add('task-order-badge');
+
+        contentDiv.appendChild(textGroupDiv);
+        contentDiv.appendChild(badgeDiv);
+        li.appendChild(contentDiv);
+
+        // Selection logik (Visuals only initial load)
+        const isSelected = selectedTasks.some(t => t.ID === teamTask.ID);
+        if (isSelected) {
+            li.classList.add('task-item-selected');
+            const index = selectedTasks.findIndex(t => t.ID === teamTask.ID);
+            badgeDiv.textContent = index + 1;
+        }
+
+        // Event Listener:
+        li.addEventListener('click', () => {
+            onTaskToggleCallback(teamTask);
+        });
+
+        listEl.appendChild(li);
+    });
+}
