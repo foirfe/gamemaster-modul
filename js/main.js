@@ -13,6 +13,11 @@ const radiusInput = document.getElementById("nearby-radius");
 const radiusValue = document.getElementById("nearby-radius-value");
 const btnNearby = document.getElementById("btn-filter-nearby");
 const radiusWrapper = document.getElementById("search-radius-wrapper");
+const btnEditRadius = document.getElementById('btn-edit-radius');
+const radiusDisplayMode = document.getElementById('radius-display-mode');
+const radiusEditMode = document.getElementById('radius-edit-mode');
+const manualRadiusInput = document.getElementById('manual-radius-input');
+const btnConfirmRadius = document.getElementById('btn-confirm-radius');
 let manualLocationOverride = false;
 let manualLatLng = null;
 let lastGpsLatLng = null; 
@@ -114,11 +119,9 @@ if (btnImportTasks && fileInputTasks) {
 
 if (radiusInput && radiusValue) {
     radiusValue.textContent = `${radiusInput.value} m`;
-
     radiusInput.addEventListener("input", () => {
         radiusValue.textContent = `${radiusInput.value} m`;
         currentRadiusMeters = Number(radiusInput.value);
-
         if (nearbyFilterEnabled && currentFilterLatLng) {
             upsertSearchRadius(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
             applyNearbyFilter(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
@@ -534,7 +537,72 @@ if (btnLocationReset) {
     });
 }
 
+// 1. Klik på "Edit" -> Skift til input-mode
+if (btnEditRadius) {
+    btnEditRadius.addEventListener('click', () => {
+        radiusDisplayMode.classList.add('hidden');
+        radiusInput.classList.add('hidden');
+        radiusEditMode.classList.remove('hidden');
+        // Sæt nuværende værdi i input og fokuser
+        manualRadiusInput.value = currentRadiusMeters;
+        manualRadiusInput.focus();
+    });
+}
 
+// 2. Klik på "Check" -> Gem og tilbage til tekst
+if (btnConfirmRadius) {
+    btnConfirmRadius.addEventListener('click', () => {
+        finishManualEdit();
+    });
+}
+
+// Tryk "Enter" i inputfeltet -> Gem
+if (manualRadiusInput) {
+    manualRadiusInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            finishManualEdit();
+        }
+    });
+}
+
+// Færdiggør redigering
+function finishManualEdit() {
+    let val = Number(manualRadiusInput.value);
+    if (!val || val <= 0) val = 100; // Minimum sikkerhed
+    // Opdater alt
+    updateRadiusState(val, true);
+    // Skift visning tilbage
+    radiusEditMode.classList.add('hidden');
+    radiusDisplayMode.classList.remove('hidden');
+       radiusInput.classList.remove('hidden');
+}
+
+// Hjælpefunktion: Central opdatering af radius
+function updateRadiusState(meters, updateSlider) {
+    currentRadiusMeters = meters;
+    // Opdater teksten
+    if (radiusValue) radiusValue.textContent = `${meters} m`;
+
+    // Opdater sliderens position
+    if (updateSlider && radiusInput) {
+        // Hvis værdien er større end sliderens max, udvider vi slideren dynamisk?
+        // Eller vi lader den bare stå på max. Her sætter vi den bare.
+        // Hvis du vil have slideren til at kunne følge med op til f.eks. 100km:
+        if (meters > Number(radiusInput.max)) {
+            radiusInput.max = meters; // Udvid slider range hvis nødvendigt
+        }
+        radiusInput.value = meters;
+    }
+
+    // Opdater kortet live
+    if (nearbyFilterEnabled && currentFilterLatLng) {
+        upsertSearchRadius(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
+        applyNearbyFilter(currentFilterLatLng.lat, currentFilterLatLng.lng, currentRadiusMeters);
+    }
+}
+
+
+//OPRET NYT SCENARIE KNAP
 document.getElementById('btn-create-new').addEventListener('click', async () => {
     hasCenteredOnce = false;
     manualLocationOverride = false;
