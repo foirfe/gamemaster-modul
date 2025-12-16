@@ -143,7 +143,7 @@ export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber) {
 
     const marker = L.marker([lat, lng], { icon });
 
-    // Click til at åbne infoboks
+    // Click til at åbne infoboks - Livs ongoing kode
 
     document.querySelectorAll(".task-order-badge").forEach(el => {
         el.addEventListener("click", (e) => {
