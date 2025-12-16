@@ -42,6 +42,22 @@ function renderDashboard(scenarios) {
         infoDiv.textContent = `Miljø: ${scenario.scenarioEnvironment || 'Ikke angivet'} | Oprettet: ${dateStr} | Opgaver: ${scenario.tasks ? scenario.tasks.length : 0}`;
         const btnsContainer = document.createElement('div');
         btnsContainer.className = 'btns-container';
+        //ENKELT SCENARIO DOWNLOAD
+        const downloadSingleBtn = document.createElement('button');
+        downloadSingleBtn.className = 'btn-scenario';
+        downloadSingleBtn.title = `Download ${scenario.scenarioTitle}.json`; 
+        downloadSingleBtn.setAttribute('aria-label', `Download: ${scenario.scenarioTitle}`);
+        const downloadSingleIcon = document.createElement('span');
+        downloadSingleIcon.className = 'material-symbols-outlined';
+        downloadSingleIcon.textContent = 'download';
+        downloadSingleBtn.appendChild(downloadSingleIcon);
+        downloadSingleBtn.onclick = () => {
+            // Konverter data for dette scenario
+            const singleScenarioData = JSON.stringify(scenario, null, 2);
+            // Brug titlen som filnavn + .json
+            const fileName = `${scenario.scenarioTitle || 'scenarie'}.json`;
+            downloadJSON(fileName, singleScenarioData);
+        };
         // REDIGER
         const editBtn = document.createElement('button');
         editBtn.className = 'btn-scenario';
@@ -68,6 +84,7 @@ function renderDashboard(scenarios) {
         deleteScenarioBtn.onclick = (e) => {
             if (typeof window.handleDeleteScenario === 'function') window.handleDeleteScenario(scenario.scenarioId);
         };
+        btnsContainer.appendChild(downloadSingleBtn);
         btnsContainer.appendChild(editBtn);
         btnsContainer.appendChild(deleteScenarioBtn);
         li.appendChild(titleDiv);
@@ -81,7 +98,7 @@ function renderDashboard(scenarios) {
     downloadLi.className = 'scenario-item download-card';
     const downloadBtn = document.createElement('button');
     downloadBtn.className = `btn-download`;
-    const downloadTextNode = document.createTextNode('Download JSON ');
+    const downloadTextNode = document.createTextNode('Download Alle Scenarier');
     const downloadIconSpan = document.createElement('span');
     downloadIconSpan.className = 'material-symbols-outlined';
     downloadIconSpan.textContent = 'download'; // Ikonnavnet

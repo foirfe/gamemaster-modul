@@ -32,6 +32,7 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 2% 5%;
 }
 .btn-scenario{
     display: flex;
