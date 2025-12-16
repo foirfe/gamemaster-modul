@@ -145,11 +145,13 @@ export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber) {
 
     // Click til at åbne infoboks - Livs ongoing kode
 
+    /*document.addEventListener("DOMContentLoaded", () => {  
     document.querySelectorAll(".task-order-badge").forEach(el => {
         el.addEventListener("click", (e) => {
             showInfoBox({ titel: "Opgave A", text: "Beskrivelse af opgaven" }, e.pageX, e.pageY);
         });
     });
+    });*/
 
     // Lav en layerGroup så vi kan have både marker + radius-cirkel (hvis ønsket)
     const layers = [marker];

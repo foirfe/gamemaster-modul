@@ -314,3 +314,43 @@ export function confirmModal({
         okBtn.focus();
     });
 }
+
+/*
+//HER FORSØGER LIV AT KODE INFOBOKS
+export function showInfoBox(data, x, y) {
+    //Fjern åben infoboks hvis du klikker på et nyt punkt
+    const existingBox = document.querySelector(".infoboks");
+    if (existingBox) existingBox.remove();
+
+//Infoboks
+const box = document.createElement("div");
+box.classList.add("infoboks");
+box.style.position = "absolute";
+box.style.top = `${y+10}px`;
+box.style.left = `${x+10}px`;
+box.style.padding = "10px";
+box.style.background = "white";
+box.style.border = "1px solid black";
+box.style.zIndex = "100";
+
+//Titel
+const titel = document.createElement("h3");
+titel.textContent = data.titel;
+box.appendChild(titel);
+
+//Tekst
+const text = document.createElement("p");
+text.textContent = data.text;
+box.appendChild(text);
+
+//Luk-knap
+const close = document.createElement("button");
+close.textContent = "x";
+close.style.marginTop = "10px";
+close.addEventListener("click", () => box.remove());
+box.appendChild(close);
+
+//Tilføj boksen til body
+document.body.appendChild(box);
+}
+*/

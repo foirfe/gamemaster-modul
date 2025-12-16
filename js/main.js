@@ -2,7 +2,7 @@
 import { initMap, clearSearchRadius, upsertSearchRadius, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
 import { Scenario } from './models.js';
 import {  readJSONFile, saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
-import { updateDashboardView, renderTaskList, updateTaskSelectionUIAndMap, mapTasksToScenario, confirmModal } from './ui-manager.js';
+import { updateDashboardView, renderTaskList, updateTaskSelectionUIAndMap, mapTasksToScenario, confirmModal, showInfoBox } from './ui-manager.js';
 
 
 const btnImportDashboard = document.getElementById('btn-import-scenarios');
@@ -754,3 +754,19 @@ if (btnNearby) {
     });
 }
 
+ //Midlertidig placering af click til infoboks
+    /*document.querySelectorAll(".task-order-badge").forEach(el => {
+        el.addEventListener("click", (e) => {
+            console.log("Badge clicked!", e.pageX, e.pageY);
+            showInfoBox({ titel: "Opgave A", text: "Beskrivelse af opgaven" }, e.pageX, e.pageY);
+        });
+    });
+
+    document.getElementById("div-task-list").addEventListener("click", (e) => {
+        if (e.target.classList.contains("task-order-badge")) {
+            const taskId = e.target.dataset.taskId;
+            console.log("Badge clicked via delegation! Task ID:", taskId);
+            showInfoBox({ titel: `Opgave ${taskId}`, text: "Beskrivelse af opgaven" }, e.pageX, e.pageY);
+        }
+    });*/
+    
