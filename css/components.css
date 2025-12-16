@@ -396,8 +396,50 @@ display: flex;
     box-shadow: 0 0 0 2px var(--secondary-color);
 }
 
-#search-radius-wrapper {
-    transition: opacity 0.2s ease;
+/* Radius Edit Styling */
+.radius-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.radius-input-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 140px; /* Lidt bredere for at undgå hop når vi skifter */
+}
+#radius-display-mode, 
+#radius-edit-mode {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Holder indholdet til højre */
+    gap: 8px;
+    width: 100%;
+}
+#radius-display-mode.hidden,
+#radius-edit-mode.hidden {
+    display: none !important;
+}
+/* Det lille inputfelt */
+.inline-input {
+    width: 80px !important; 
+    padding: 4px 5px !important;
+    margin: 0 !important;
+    height: 30px; /* Matcher tekstens højde bedre */
+    font-size: 1rem;
+    text-align: right;
+    border: 1px solid #fff; /* Hvid kant så man kan se feltet på den mørke baggrund */
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.1); /* Let gennemsigtig baggrund */
+    color: #fff;
+}
+
+/* Fjerner standard 'spinners' i nummer-feltet for et renere look */
+.inline-input::-webkit-outer-spin-button,
+.inline-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 /* Task badge på kortet (samme look som i listen) */
@@ -440,9 +482,9 @@ display: flex;
         grid-template-columns: 1fr;
     }
 
-    /* --- SIDEBAR SOM BUND-PANEL (BOTTOM SHEET) --- */
+    /* --- SIDEBAR SOM BUND-PANEL PÅ MOBIL --- */
     #task-sidebar {
-        position: absolute; /* Nu relativt til #view-editor */
+        position: absolute;
         top: auto;          
         left: 0;
         bottom: 0;         

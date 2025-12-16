@@ -25,6 +25,9 @@ h1{
     font-weight: bolder;
 }
 
+.hidden{
+    display: none;
+}
 /*Views*/
 .view-hidden {
     display: none !important;

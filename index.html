@@ -60,10 +60,27 @@
                     <button id="btn-filter-nearby">Vis opgaver i nærheden</button>
                     <button id="btn-location-reset">Nulstil placering (GPS)</button>
                 </div>
-                <div id="search-radius-wrapper" class="hidden">
-                    <label for="nearby-radius">Søgeradius -</label> <label id="nearby-radius-value">5000 m</label>
-                    <input id="nearby-radius" type="range" min="250" max="20000" step="250" value="5000">
-                </div>
+                    <div id="search-radius-wrapper" class="hidden">
+    <div class="radius-header">
+        <label for="nearby-radius">Søgeradius - </label>
+        
+        <div class="radius-input-group">
+            
+            <div id="radius-display-mode">
+                <span id="nearby-radius-value">5000 m</span>
+                <span id="btn-edit-radius" class="material-symbols-outlined action-icon" title="Rediger manuelt">edit</span>
+            </div>
+
+            <div id="radius-edit-mode" class="hidden">
+                <input type="number" id="manual-radius-input" class="inline-input">
+                <span id="btn-confirm-radius" class="material-symbols-outlined action-icon confirm-icon" title="Gem">check</span>
+            </div>
+            
+        </div>
+    </div>
+    
+    <input id="nearby-radius" type="range" min="250" max="20000" step="250" value="5000">
+</div>
 
 
 
