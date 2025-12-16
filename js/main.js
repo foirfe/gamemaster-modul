@@ -169,10 +169,11 @@ window.addEventListener("userLocationMoved", (e) => {
     manualLatLng = { lat, lng };
     currentFilterLatLng = { lat, lng };
 
-    // ✅ kun filtrér live hvis filter er slået til
     if (nearbyFilterEnabled) {
         upsertSearchRadius(lat, lng, currentRadiusMeters);
         applyNearbyFilter(lat, lng, currentRadiusMeters);
+    } else {
+        clearSearchRadius();
     }
 });
 
@@ -588,3 +589,4 @@ if (btnNearby) {
         }
     });
 }
+

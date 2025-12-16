@@ -8,7 +8,7 @@ let searchRadiusCircle = null;
 
 // Gemmer cirkler/markører pr task-ID
 const taskLayers = new Map();
-
+const SEARCH_RADIUS_CLASS = "search-radius-circle";
 
 
 export function initMap(elementId) {
@@ -167,28 +167,35 @@ export function removeTaskCircle(taskId) {
     }
 }
 
-export function upsertSearchRadius(lat, lng, radiusMeters) {
+exxport function upsertSearchRadius(lat, lng, radiusMeters) {
     if (!map) return;
 
-    if (searchRadiusCircle) {
-        map.removeLayer(searchRadiusCircle);
-        searchRadiusCircle = null;
-    }
+    // Fjern ALT med vores class (robust hvis map-manager er loadet 2 gange)
+    clearSearchRadius();
 
     if (!radiusMeters || Number(radiusMeters) <= 0) return;
 
     searchRadiusCircle = L.circle([lat, lng], {
-        radius: Number(radiusMeters)
+        radius: Number(radiusMeters),
+        className: SEARCH_RADIUS_CLASS
     }).addTo(map);
 }
 
-//clearsearchradius
 export function clearSearchRadius() {
     if (!map) return;
+
+    // Fjern den vi selv holder styr på
     if (searchRadiusCircle) {
         map.removeLayer(searchRadiusCircle);
         searchRadiusCircle = null;
     }
+
+    // Fjern også evt. andre search-radius cirkler (hvis der findes en “ekstra” instans)
+    map.eachLayer((layer) => {
+        if (layer?.options?.className === SEARCH_RADIUS_CLASS) {
+            map.removeLayer(layer);
+        }
+    });
 }
 
 export function clearAllTaskLayers() {
