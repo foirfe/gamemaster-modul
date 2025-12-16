@@ -436,7 +436,7 @@ function onPositionUpdate(position) {
         currentFilterLatLng = { lat, lng };
     } else {
         if (manualLatLng) {
-            upsertUserLocation(manualLatLng.lat, manualLatLng.lng, accuracy);
+            upsertUserLocation(manualLatLng.lat, manualLatLng.lng, null);
         }
     }
 }
