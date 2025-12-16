@@ -136,7 +136,7 @@ export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber) {
     // Marker som badge med samme CSS-klasse som i sidebar
     const icon = L.divIcon({
         className: 'leaflet-task-icon',
-        html: `<div class="task-order-badge">${orderNumber}</div>`,
+        html: `<div class="task-order-badge" data-task-id=${taskId}>${orderNumber}</div>`,
         iconSize: [32, 32],
         iconAnchor: [16, 16]
     });
