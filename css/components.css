@@ -412,6 +412,7 @@ display: flex;
 #radius-display-mode, 
 #radius-edit-mode {
     display: flex;
+    color: #fff;
     align-items: center;
     justify-content: flex-end; /* Holder indholdet til højre */
     gap: 8px;
@@ -431,8 +432,7 @@ display: flex;
     text-align: right;
     border: 1px solid #fff; /* Hvid kant så man kan se feltet på den mørke baggrund */
     border-radius: 4px;
-    background-color: rgba(255, 255, 255, 0.1); /* Let gennemsigtig baggrund */
-    color: #fff;
+    background-color: #fff;
 }
 
 /* Fjerner standard 'spinners' i nummer-feltet for et renere look */

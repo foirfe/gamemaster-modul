@@ -620,10 +620,31 @@ if (btnConfirmRadius) {
 
 // Tryk "Enter" i inputfeltet -> Gem
 if (manualRadiusInput) {
+    // Gem ved Enter
     manualRadiusInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             finishManualEdit();
         }
+    });
+    // Stopper bogstaver FØR de rammer feltet
+    manualRadiusInput.addEventListener('keydown', function(e) {
+        // Vi tillader: backspace, delete, tab, escape, enter
+        const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+        if (allowedKeys.includes(e.key) || (e.ctrlKey === true) || (e.metaKey === true)) {
+            return; // Lad handlingen ske
+        }
+        // Tjek om tasten er et tal (0-9)
+        // Hvis IKKE det er et tal, så stop handlingen
+        if (!/^[0-9]$/.test(e.key)) {
+            e.preventDefault();
+        }
+    });
+    // Ekstra sikkerhed: 'paste' event
+    manualRadiusInput.addEventListener('paste', function(e) {
+        // Vent et øjeblik til teksten er sat ind, og rens den så
+        setTimeout(() => {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        }, 1);
     });
 }
 
@@ -631,6 +652,20 @@ if (manualRadiusInput) {
 function finishManualEdit() {
     let val = Number(manualRadiusInput.value);
     if (!val || val <= 0) val = 100; // Minimum sikkerhed
+    const MAX_RADIUS = 500000;
+    if (val > MAX_RADIUS) {
+        val = MAX_RADIUS;
+        // Valgfrit: Giv brugeren besked, eller lad bare feltet rette sig selv
+       confirmModal({
+            title: "Radius justeret",
+            lines: [
+                `Maksimal tilladt radius er ${MAX_RADIUS} meter.`,
+                "Vi har rettet din indtastning til grænsen."
+            ],
+            confirmText: "Forstået",
+            cancelText: "Luk"
+        });
+    }
     // Opdater alt
     updateRadiusState(val, true);
     // Skift visning tilbage
