@@ -80,3 +80,73 @@ h1{
     #error-tasks.is-visible {
         display: block;
     }
+
+
+.gm-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: grid;
+    place-items: center;
+    z-index: 999999; /* vigtig så den ligger over Leaflet */
+    padding: 16px;
+}
+
+.gm-modal {
+    width: min(520px, 92vw);
+    background: #fff;
+    border-radius: 14px;
+    padding: 16px 16px 14px;
+    box-shadow: 0 14px 50px rgba(0,0,0,0.25);
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+    .gm-modal.is-danger {
+        border-left: 6px solid #c0392b;
+    }
+
+.gm-modal-title {
+    margin: 0 0 10px;
+    font-size: 1.1rem;
+    color: #1D2C50;
+}
+
+.gm-modal-body {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.gm-modal-line {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.gm-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.gm-modal-btn {
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.gm-modal-cancel {
+    background: #e9ebeb;
+    color: #1D2C50;
+}
+
+.gm-modal-confirm {
+    background: #8D1B3D;
+    color: #fff;
+}
+
+.gm-modal.is-danger .gm-modal-confirm {
+    background: #c0392b;
+}

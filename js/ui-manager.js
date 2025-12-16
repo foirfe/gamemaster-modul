@@ -234,3 +234,83 @@ export function renderTaskList(tasksToShow, selectedTasks, onTaskToggleCallback)
         listEl.appendChild(li);
     });
 }
+
+export function confirmModal({
+    title = "Bekræft",
+    lines = [],
+    confirmText = "OK",
+    cancelText = "Annuller",
+    danger = false
+} = {}) {
+    return new Promise((resolve) => {
+        // overlay
+        const overlay = document.createElement("div");
+        overlay.classList.add("gm-modal-overlay");
+
+        // modal
+        const modal = document.createElement("div");
+        modal.classList.add("gm-modal");
+        if (danger) modal.classList.add("is-danger");
+        modal.setAttribute("role", "dialog");
+        modal.setAttribute("aria-modal", "true");
+
+        // title
+        const h = document.createElement("h3");
+        h.classList.add("gm-modal-title");
+        h.textContent = title;
+
+        // body
+        const body = document.createElement("div");
+        body.classList.add("gm-modal-body");
+
+        lines.forEach((line) => {
+            const p = document.createElement("p");
+            p.classList.add("gm-modal-line");
+            p.textContent = line;
+            body.appendChild(p);
+        });
+
+        // actions
+        const actions = document.createElement("div");
+        actions.classList.add("gm-modal-actions");
+
+        const cancelBtn = document.createElement("button");
+        cancelBtn.type = "button";
+        cancelBtn.classList.add("gm-modal-btn", "gm-modal-cancel");
+        cancelBtn.textContent = cancelText;
+
+        const okBtn = document.createElement("button");
+        okBtn.type = "button";
+        okBtn.classList.add("gm-modal-btn", "gm-modal-confirm");
+        okBtn.textContent = confirmText;
+
+        actions.appendChild(cancelBtn);
+        actions.appendChild(okBtn);
+
+        modal.appendChild(h);
+        modal.appendChild(body);
+        modal.appendChild(actions);
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        const close = (val) => {
+            overlay.remove();
+            resolve(val);
+        };
+
+        cancelBtn.addEventListener("click", () => close(false));
+        okBtn.addEventListener("click", () => close(true));
+
+        overlay.addEventListener("click", (e) => {
+            if (e.target === overlay) close(false);
+        });
+
+        const onKey = (e) => {
+            if (e.key === "Escape") close(false);
+        };
+        document.addEventListener("keydown", onKey, { once: true });
+
+        okBtn.focus();
+    });
+}
