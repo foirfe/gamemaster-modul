@@ -129,6 +129,7 @@ export function mapTasksToScenario(teamTask, index) {
     }
     task.mapLabel = `OP${index + 1}`;
     task.isActive = false;
+    task.options = teamTask.Valgmuligheder ?? [];
     return task;
 }
 

@@ -395,8 +395,7 @@ export async function editScenario(id) {
                 Lokation: [savedTask.mapLat, savedTask.mapLng], // Genskab koordinater
                 Radius: savedTask.mapRadiusInMeters,
                 Aktiveringsbetingelse: savedTask.mapType === 'zone' ? 'Zone' : 'Lokalitet', 
-                // Bemærk: Valgmuligheder gemmes pt. ikke i Scenario-modellen, så de vil være tomme
-                Valgmuligheder: [] 
+                Valgmuligheder: savedTask.options
             };
 
             // Tilføj den til allTasks, så den også vises i listen til venstre
