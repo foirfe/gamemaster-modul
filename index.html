@@ -45,32 +45,44 @@
 
                 <label for="scenario-name">Scenarie</label>
                 <input type="text" id="scenario-name" placeholder="Skriv scenarie navn">
+                <small class="field-error-msg" id="error-name">Scenarie-navn er påkrævet</small>
+
                 <div class="scenario-desc-container">
                     <label for="scenario-desc">Beskrivelse</label>
-                    <textarea id="scenario-desc" placeholder="Skriv beskrivelse"> </textarea>
+                    <textarea id="scenario-desc" placeholder="Skriv beskrivelse"></textarea>
+                    <small class="field-error-msg" id="error-desc">Beskrivelse er påkrævet</small>
+
                 </div>
 
 
 
-                <div id="div-location-btn"><button id="btn-filter-nearby">Vis opgaver i nærheden</button>
-                <button id="btn-location-reset">Nulstil placering (GPS)</button></div>
+                <div id="div-location-btn">
+                    <button id="btn-filter-nearby">Vis opgaver i nærheden</button>
+                    <button id="btn-location-reset">Nulstil placering (GPS)</button>
+                </div>
                 <div id="search-radius-wrapper" class="hidden">
                     <label for="nearby-radius">Søgeradius -</label> <label id="nearby-radius-value">5000 m</label>
-                    <input id="nearby-radius" type="range" min="250" max="20000" step="250" value="5000">                 
+                    <input id="nearby-radius" type="range" min="250" max="20000" step="250" value="5000">
                 </div>
 
-                
+
 
                 <h3>Tilgængelige opgaver</h3>
                 <label for="scenario-type">Filtrer efter type</label>
-<select name="type" id="scenario-type">
-    <option value="alle">Alle</option>
-    <option value="Land">Land</option>
-    <option value="Vand">Vand</option>
-</select>
+                <select name="type" id="scenario-type">
+                    <option value="alle">Alle</option>
+                    <option value="Land">Land</option>
+                    <option value="Vand">Vand</option>
+                </select>
                 <div id="div-task-list" class="scrollable-list">
                     <ul id="task-list" class="task-list"></ul>
+
                 </div>
+                <small class="field-error-msg" id="error-tasks">
+                    Vælg mindst én opgave
+                </small>
+
+
                 <button id="btn-save">
                     Gem<span class="material-symbols-outlined">
                         save

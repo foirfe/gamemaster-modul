@@ -176,7 +176,42 @@ window.addEventListener("userLocationMoved", (e) => {
     }
 });
 
+
+function resetEditorUI() {
+    // ryd inputfelter
+    document.getElementById('scenario-name').value = "";
+    document.getElementById('scenario-desc').value = "";
+    document.getElementById('scenario-type').value = "alle";
+
+    // ryd validering UI
+    document.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
+    document.querySelectorAll(".field-error-msg").forEach(el => el.classList.remove("is-visible"));
+
+    // ryd task state
+    selectedTasks = [];
+    filteredTasks = null;
+
+    // ryd kort/UI for tasks (tegner ingenting)
+    updateTaskSelectionUIAndMap(selectedTasks);
+    refreshTaskListUI();
+
+    // ryd nærhedsfilter UI/state
+    nearbyFilterEnabled = false;
+    clearSearchRadius();
+    if (radiusWrapper) radiusWrapper.classList.add("hidden");
+    if (btnNearby) {
+        btnNearby.classList.remove("is-active");
+        btnNearby.textContent = "VIS OPGAVER I NÆRHEDEN";
+    }
+
+    // nulstil scenario objekt (så du ikke gemmer på “gammelt”)
+    currentScenario = new Scenario();
+    currentScenario.scenarioId = "S" + Date.now();
+    currentScenario.scenarioCreatedBy = "Gamemaster";
+}
+
 document.getElementById('btn-back').addEventListener('click', () => {
+    resetEditorUI();
     switchView('dashboard');
 });
 
@@ -191,8 +226,14 @@ function handleTaskToggle(taskClicked) {
         // Vi behøver ikke kalde removeTaskCircle manuelt her, 
         // da updateTaskSelectionUIAndMap rydder og gentegner alt.
     }
+
+    if (selectedTasks.length > 0) {
+        document.getElementById("error-tasks")?.classList.remove("is-visible");
+    }
     // Kald UI opdatering (i ui-manager) med den nye state
     updateTaskSelectionUIAndMap(selectedTasks);
+
+
 }
 
 function refreshTaskListUI() {
@@ -230,13 +271,47 @@ if (typeSelect) {
 }
 
 
+// ---------- VALIDATION (clean) ----------
+function toggleError(inputEl, msgId, show) {
+    const msgEl = document.getElementById(msgId);
+    if (inputEl) inputEl.classList.toggle("field-error", show);
+    msgEl?.classList.toggle("is-visible", show);
+}
+
+function validateScenario({ nameEl, descEl, selectedTasks }) {
+    const nameOk = nameEl.value.trim().length > 0;
+    const descOk = descEl.value.trim().length > 0;
+    const tasksOk = selectedTasks.length > 0;
+
+    toggleError(nameEl, "error-name", !nameOk);
+    toggleError(descEl, "error-desc", !descOk);
+    document.getElementById("error-tasks")?.classList.toggle("is-visible", !tasksOk);
+
+    return nameOk && descOk && tasksOk;
+}
+
+function wireLiveValidation() {
+    const nameEl = document.getElementById("scenario-name");
+    const descEl = document.getElementById("scenario-desc");
+
+    nameEl?.addEventListener("input", () => toggleError(nameEl, "error-name", false));
+    descEl?.addEventListener("input", () => toggleError(descEl, "error-desc", false));
+}
+
+// Kør live-validering én gang
+wireLiveValidation();
 
 // "Gem" knap logic
 document.getElementById('btn-save').addEventListener('click', () => {
-    const nameInput = document.getElementById('scenario-name');
-    const typeSelect = document.getElementById('scenario-type');
-    const scenarioDesc = document.getElementById('scenario-desc')
-    // Opdater objektet med værdier fra UI
+        const nameEl = document.getElementById('scenario-name');
+        const descEl = document.getElementById('scenario-desc');
+        const typeSelect = document.getElementById('scenario-type');
+
+        // ✅ STOP hvis validering fejler (viser fejl under felter)
+        if (!validateScenario({ nameEl, descEl, selectedTasks })) return;
+
+
+
     currentScenario.scenarioTitle = nameInput.value || "Uden navn";
     currentScenario.scenarioEnvironment = typeSelect.value === "choose" ? "" : typeSelect.value;
     currentScenario.scenarioDescription = scenarioDesc.value || "Ingen beskrivelse";
