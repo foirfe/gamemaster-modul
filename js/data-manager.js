@@ -35,19 +35,22 @@ export function deleteScenario(id) {
     return false;
 }
 //Importere scenarier fra en fil
-export function readJSONFile(file, callback) {
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        try {
-            const jsonContent = event.target.result;
-            const data = JSON.parse(jsonContent);
-            callback(data);
-        } catch (e) {
-            console.error("Fejl ved indlæsning af fil:", e);
-            alert("Filen kunne ikke læses. Er det en gyldig JSON fil?");
-        }
-    };
-    reader.readAsText(file);
+export function readJSONFile(file) {
+    // Promise pga. feedback vindue
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            try {
+                resolve(JSON.parse(reader.result));
+            } catch (e) {
+                reject(new Error("Ugyldig JSON"));
+            }
+        };
+
+        reader.onerror = () => reject(new Error("Kunne ikke læse filen"));
+        reader.readAsText(file);
+    });
 }
 //Downloader data som en JSON-fil.
 export function downloadJSON(filename, data) {

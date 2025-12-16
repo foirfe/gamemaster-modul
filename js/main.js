@@ -1,7 +1,7 @@
 //Main // test
 import { initMap, clearSearchRadius, upsertSearchRadius, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
 import { Scenario } from './models.js';
-import {  readJSONFile, saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
+import { readJSONFile, saveScenarioToStorage, getScenariosFromStorage, deleteScenario } from './data-manager.js';
 import { updateDashboardView, renderTaskList, updateTaskSelectionUIAndMap, mapTasksToScenario, confirmModal } from './ui-manager.js';
 
 
@@ -20,11 +20,11 @@ const manualRadiusInput = document.getElementById('manual-radius-input');
 const btnConfirmRadius = document.getElementById('btn-confirm-radius');
 let manualLocationOverride = false;
 let manualLatLng = null;
-let lastGpsLatLng = null; 
+let lastGpsLatLng = null;
 let hasCenteredOnce = false;
 let nearbyFilterEnabled = false; // default OFF (vis alle opgaver)
-let currentScenario = new Scenario(); 
-let selectedTasks = []; 
+let currentScenario = new Scenario();
+let selectedTasks = [];
 let allTasks = [];
 
 
@@ -35,10 +35,29 @@ if (btnImportDashboard && fileInputImport) {
         fileInputImport.click();
     });
 
-    fileInputImport.addEventListener('change', (event) => {
+    fileInputImport.addEventListener('change', async (event) => {
         const file = event.target.files[0];
         if (!file) return;
-        readJSONFile(file, (importedData) => {
+
+        let importedData;
+
+        try {
+            importedData = await readJSONFile(file);
+        } catch (err) {
+            await confirmModal({
+                title: "Kunne ikke læse fil",
+                lines: [
+                    err.message,
+                    "Er det en gyldig JSON-fil?"
+                ],
+                confirmText: "OK",
+                cancelText: "Luk"
+            });
+            fileInputImport.value = '';
+            return;
+        }
+
+
             const newScenarios = Array.isArray(importedData) ? importedData : [importedData];
             let addedCount = 0;
             let updatedCount = 0;
@@ -69,11 +88,17 @@ if (btnImportDashboard && fileInputImport) {
             if (updatedCount > 0) msg += `- Opdateret: ${updatedCount}\n`;
             if (invalidCount > 0) msg += `- Fejlede/Ugyldige: ${invalidCount}\n(Forkert format?)`;
             if (addedCount === 0 && updatedCount === 0) {
-                 msg = "Ingen gyldige scenarier fundet i filen.";
+                msg = "Ingen gyldige scenarier fundet i filen.";
             }
-            alert(msg);
-            fileInputImport.value = ''; 
-        });
+
+            await confirmModal({
+                title: "Scenarier importeret",
+                lines: msg.split("\n").filter(Boolean),
+                confirmText: "OK",
+                cancelText: "Luk"
+            });
+
+            fileInputImport.value = '';
     });
 }
 // IMPORT AF OPGAVER
@@ -81,14 +106,29 @@ if (btnImportTasks && fileInputTasks) {
     btnImportTasks.addEventListener('click', () => {
         fileInputTasks.click();
     });
+
     fileInputTasks.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
-        readJSONFile(file, (importedData) => {
+        readJSONFile(file, async (importedData) => {
             const newTasks = Array.isArray(importedData) ? importedData : [importedData];
             let addedCount = 0;
             let updatedCount = 0;
             let invalidCount = 0;
+
+            try {
+                importedData = await readJSONFile(file);
+            } catch (err) {
+                await confirmModal({
+                    title: "Kunne ikke læse fil",
+                    lines: [err.message, "Er det en gyldig JSON-fil?"],
+                    confirmText: "Prøv igen",
+                    cancelText: "Luk"
+                });
+                fileInputTasks.value = '';
+                return;
+            }
+            
             newTasks.forEach(newTask => {
                 // VALIDERING: Er det faktisk en opgave?
                 if (newTask.ID === undefined || !newTask.Titel) {
@@ -112,7 +152,14 @@ if (btnImportTasks && fileInputTasks) {
             if (addedCount > 0) msg += `- Nye tilføjet: ${addedCount}\n`;
             if (updatedCount > 0) msg += `- Opdateret: ${updatedCount}\n`;
             if (invalidCount > 0) msg += `- Ugyldige data: ${invalidCount}\n(Du har nok valgt en forkert fil)`;
-            alert(msg);
+
+            await confirmModal({
+                title: "Opgaver importeret",
+                lines: msg.split("\n").filter(Boolean),
+                confirmText: "OK",
+                cancelText: "Luk"
+            });
+
             fileInputTasks.value = '';
         });
     });
@@ -346,12 +393,12 @@ wireLiveValidation();
 
 // "Gem" knap logic
 document.getElementById('btn-save').addEventListener('click', async () => {
-        const nameEl = document.getElementById('scenario-name');
-        const descEl = document.getElementById('scenario-desc');
-        const typeSelect = document.getElementById('scenario-type');
+    const nameEl = document.getElementById('scenario-name');
+    const descEl = document.getElementById('scenario-desc');
+    const typeSelect = document.getElementById('scenario-type');
 
-        // ✅ STOP hvis validering fejler (viser fejl under felter)
-        if (!validateScenario({ nameEl, descEl, selectedTasks })) return;
+    // ✅ STOP hvis validering fejler (viser fejl under felter)
+    if (!validateScenario({ nameEl, descEl, selectedTasks })) return;
 
 
 
@@ -372,7 +419,7 @@ document.getElementById('btn-save').addEventListener('click', async () => {
         currentScenario.scenarioEnvironment = "Vand";
     } else {
         // Fallback hvis ingen tasks er valgt, eller tasks uden type
-        currentScenario.scenarioEnvironment = "Kombineret"; 
+        currentScenario.scenarioEnvironment = "Kombineret";
     }
 
     const env = currentScenario.scenarioEnvironment || "Ikke angivet";
@@ -390,7 +437,13 @@ document.getElementById('btn-save').addEventListener('click', async () => {
         });
     } catch (e) {
         console.error("confirmModal fejlede:", e);
-        alert("Modal fejlede – tjek console (F12).");
+        await confirmModal({
+            title: "Der skete en fejl",
+            lines: ["Modal fejlede – tjek console (F12)."],
+            confirmText: "OK",
+            cancelText: "Luk"
+        });
+        return;
         return;
     }
 
@@ -399,7 +452,7 @@ document.getElementById('btn-save').addEventListener('click', async () => {
 
     // Gem (data-manager håndterer nu om det er update eller create)
     saveScenarioToStorage(currentScenario);
-    
+
     // Gå tilbage
     switchView('dashboard');
     updateDashboardView();
@@ -408,7 +461,7 @@ document.getElementById('btn-save').addEventListener('click', async () => {
 // Funktion til at klargøre editor til et NYT scenarie
 function resetEditor() {
     currentScenario = new Scenario();
-    currentScenario.scenarioId = "S" + Date.now(); 
+    currentScenario.scenarioId = "S" + Date.now();
     currentScenario.scenarioCreatedBy = "Gamemaster"; // Her kunne der være en dynamisk bruger med auth.
     selectedTasks = [];
     // Nulstil UI felter
@@ -416,7 +469,7 @@ function resetEditor() {
     document.getElementById('scenario-type').value = "alle";
     document.getElementById('scenario-desc').value = "";
     filteredTasks = null;
-    updateTaskSelectionUIAndMap(selectedTasks); 
+    updateTaskSelectionUIAndMap(selectedTasks);
 }
 
 
@@ -424,7 +477,7 @@ function resetEditor() {
 export async function editScenario(id) {
     const scenarios = getScenariosFromStorage();
     const foundScenario = scenarios.find(s => s.scenarioId === id);
-    
+
     if (!foundScenario) {
         console.error("Scenarie ikke fundet:", id);
         return;
@@ -459,7 +512,7 @@ export async function editScenario(id) {
                 Type: savedTask.taskType || "Land", // Fallback hvis type mangler
                 Lokation: [savedTask.mapLat, savedTask.mapLng], // Genskab koordinater
                 Radius: savedTask.mapRadiusInMeters,
-                Aktiveringsbetingelse: savedTask.mapType === 'zone' ? 'Zone' : 'Lokalitet', 
+                Aktiveringsbetingelse: savedTask.mapType === 'zone' ? 'Zone' : 'Lokalitet',
                 Valgmuligheder: savedTask.options
             };
 
@@ -471,7 +524,7 @@ export async function editScenario(id) {
         selectedTasks.push(originalTask);
     });
 
-   filteredTasks = null; 
+    filteredTasks = null;
     renderTaskList(filteredTasks || allTasks, selectedTasks, handleTaskToggle);
     updateTaskSelectionUIAndMap(selectedTasks);
 }
@@ -564,19 +617,24 @@ function runTaskFilters() {
 function applyNearbyFilter(lat, lng, radiusMeters) {
     currentFilterLatLng = { lat, lng };
     currentRadiusMeters = Number(radiusMeters) || 0;
-    
+
     // I stedet for at filtrere her, kalder vi hoved-filteret
     runTaskFilters();
 }
 const btnLocationReset = document.getElementById("btn-location-reset");
 
 if (btnLocationReset) {
-    btnLocationReset.addEventListener("click", () => {
+    btnLocationReset.addEventListener("click", async () => {
         manualLocationOverride = false;
         manualLatLng = null;
 
         if (!lastGpsLatLng) {
-            alert("GPS er ikke klar endnu – prøv igen om et øjeblik.");
+            await confirmModal({
+                title: "GPS ikke klar",
+                lines: ["GPS er ikke klar endnu – prøv igen om et øjeblik."],
+                confirmText: "OK",
+                cancelText: "Luk"
+            });
             return;
         }
 
@@ -593,7 +651,7 @@ if (btnLocationReset) {
         } else {
             // Filter er slået fra => vis alle + ingen radiuscirkel
             filteredTasks = null;
-           refreshTaskListUI();
+            refreshTaskListUI();
             clearSearchRadius();
         }
     });
@@ -627,7 +685,7 @@ if (manualRadiusInput) {
         }
     });
     // Stopper bogstaver FØR de rammer feltet
-    manualRadiusInput.addEventListener('keydown', function(e) {
+    manualRadiusInput.addEventListener('keydown', function (e) {
         // Vi tillader: backspace, delete, tab, escape, enter
         const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
         if (allowedKeys.includes(e.key) || (e.ctrlKey === true) || (e.metaKey === true)) {
@@ -640,7 +698,7 @@ if (manualRadiusInput) {
         }
     });
     // Ekstra sikkerhed: 'paste' event
-    manualRadiusInput.addEventListener('paste', function(e) {
+    manualRadiusInput.addEventListener('paste', function (e) {
         // Vent et øjeblik til teksten er sat ind, og rens den så
         setTimeout(() => {
             this.value = this.value.replace(/[^0-9]/g, '');
@@ -656,7 +714,7 @@ function finishManualEdit() {
     if (val > MAX_RADIUS) {
         val = MAX_RADIUS;
         // Valgfrit: Giv brugeren besked, eller lad bare feltet rette sig selv
-       confirmModal({
+        confirmModal({
             title: "Radius justeret",
             lines: [
                 `Maksimal tilladt radius er ${MAX_RADIUS} meter.`,
@@ -671,7 +729,7 @@ function finishManualEdit() {
     // Skift visning tilbage
     radiusEditMode.classList.add('hidden');
     radiusDisplayMode.classList.remove('hidden');
-       radiusInput.classList.remove('hidden');
+    radiusInput.classList.remove('hidden');
 }
 
 // Hjælpefunktion: Central opdatering af radius
@@ -720,7 +778,7 @@ document.getElementById('btn-create-new').addEventListener('click', async () => 
 });
 
 if (btnNearby) {
-    btnNearby.addEventListener("click", () => {
+    btnNearby.addEventListener("click", async () => {
         nearbyFilterEnabled = !nearbyFilterEnabled;
 
         btnNearby.classList.toggle("is-active", nearbyFilterEnabled);
@@ -734,7 +792,12 @@ if (btnNearby) {
         }
 
         if (nearbyFilterEnabled && !currentFilterLatLng) {
-            alert("Flyt lokationsmarkøren eller vent på GPS, før du filtrerer.");
+            await confirmModal({
+                title: "Kan ikke filtrere endnu",
+                lines: ["Flyt lokationsmarkøren eller vent på GPS, før du filtrerer."],
+                confirmText: "OK",
+                cancelText: "Luk"
+            });
             nearbyFilterEnabled = false;
 
             btnNearby.classList.remove("is-active");
@@ -755,18 +818,17 @@ if (btnNearby) {
 }
 
  //Midlertidig placering af click til infoboks
-    /*document.querySelectorAll(".task-order-badge").forEach(el => {
-        el.addEventListener("click", (e) => {
-            console.log("Badge clicked!", e.pageX, e.pageY);
-            showInfoBox({ titel: "Opgave A", text: "Beskrivelse af opgaven" }, e.pageX, e.pageY);
-        });
+/*document.querySelectorAll(".task-order-badge").forEach(el => {
+    el.addEventListener("click", (e) => {
+        console.log("Badge clicked!", e.pageX, e.pageY);
+        showInfoBox({ titel: "Opgave A", text: "Beskrivelse af opgaven" }, e.pageX, e.pageY);
     });
+});
 
-    document.getElementById("div-task-list").addEventListener("click", (e) => {
-        if (e.target.classList.contains("task-order-badge")) {
-            const taskId = e.target.dataset.taskId;
-            console.log("Badge clicked via delegation! Task ID:", taskId);
-            showInfoBox({ titel: `Opgave ${taskId}`, text: "Beskrivelse af opgaven" }, e.pageX, e.pageY);
-        }
-    });*/
-    
+document.getElementById("div-task-list").addEventListener("click", (e) => {
+    if (e.target.classList.contains("task-order-badge")) {
+        const taskId = e.target.dataset.taskId;
+        console.log("Badge clicked via delegation! Task ID:", taskId);
+        showInfoBox({ titel: `Opgave ${taskId}`, text: "Beskrivelse af opgaven" }, e.pageX, e.pageY);
+    }
+});*/
