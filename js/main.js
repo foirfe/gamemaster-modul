@@ -2,7 +2,7 @@
 import { initMap, clearSearchRadius, upsertSearchRadius, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
 import { Scenario } from './models.js';
 import {  readJSONFile, saveScenarioToStorage,getScenariosFromStorage, deleteScenario } from './data-manager.js';
-import { updateDashboardView, renderTaskList, updateTaskSelectionUIAndMap, mapTasksToScenario } from './ui-manager.js';
+import { updateDashboardView, renderTaskList, updateTaskSelectionUIAndMap, mapTasksToScenario, confirmModal } from './ui-manager.js';
 
 
 const btnImportDashboard = document.getElementById('btn-import-scenarios');
@@ -306,7 +306,7 @@ function wireLiveValidation() {
 wireLiveValidation();
 
 // "Gem" knap logic
-document.getElementById('btn-save').addEventListener('click', () => {
+document.getElementById('btn-save').addEventListener('click', async () => {
         const nameEl = document.getElementById('scenario-name');
         const descEl = document.getElementById('scenario-desc');
         const typeSelect = document.getElementById('scenario-type');
@@ -335,6 +335,29 @@ document.getElementById('btn-save').addEventListener('click', () => {
         // Fallback hvis ingen tasks er valgt, eller tasks uden type
         currentScenario.scenarioEnvironment = "Kombineret"; 
     }
+
+    const env = currentScenario.scenarioEnvironment || "Ikke angivet";
+    let ok = false;
+    try {
+        ok = await confirmModal({
+            title: "Vil du gemme scenariet?",
+            lines: [
+                `Titel: ${nameEl.value.trim()}`,
+                `Type: ${env}`,
+                `Antal opgaver: ${selectedTasks.length}`
+            ],
+            confirmText: "Ja, gem",
+            cancelText: "Annuller"
+        });
+    } catch (e) {
+        console.error("confirmModal fejlede:", e);
+        alert("Modal fejlede – tjek console (F12).");
+        return;
+    }
+
+    if (!ok) return;
+
+
     // Gem (data-manager håndterer nu om det er update eller create)
     saveScenarioToStorage(currentScenario);
     
