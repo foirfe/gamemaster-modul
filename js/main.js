@@ -28,6 +28,7 @@ let selectedTasks = [];
 let allTasks = [];
 
 
+
 // --- IMPORT AF SCENARIER (Dashboard) ---
 if (btnImportDashboard && fileInputImport) {
     btnImportDashboard.addEventListener('click', () => {
@@ -131,12 +132,25 @@ if (radiusInput && radiusValue) {
 
 // Gør funktioner tilgængelige globalt så ui-manager kan kalde dem
 window.editScenario = editScenario;
-window.handleDeleteScenario = (id) => {
-    if (confirm('Er du sikker på, at du vil slette dette scenarie?')) {
-        const success = deleteScenario(id);
-        if (success) {
-            updateDashboardView();
-        }
+window.handleDeleteScenario = async (id) => {
+    const scenarios = getScenariosFromStorage();
+    const scenario = scenarios.find(s => s.scenarioId === id);
+
+    const ok = await confirmModal({
+        title: "Slet scenarie?",
+        lines: [
+            `Titel: ${scenario?.scenarioTitle ?? "Ukendt scenarie"}`,
+            "Scenariet bliver arkiveret og kan ikke gendannes."
+        ],
+        confirmText: "Ja, slet",
+        cancelText: "Annuller"
+    });
+
+    if (!ok) return;
+
+    const success = deleteScenario(id);
+    if (success) {
+        updateDashboardView();
     }
 };
 
@@ -214,7 +228,32 @@ function resetEditorUI() {
     currentScenario.scenarioCreatedBy = "Gamemaster";
 }
 
-document.getElementById('btn-back').addEventListener('click', () => {
+function hasUnsavedEditorContent() {
+    const name = document.getElementById('scenario-name')?.value.trim();
+    const desc = document.getElementById('scenario-desc')?.value.trim();
+
+    return (
+        name.length > 0 ||
+        desc.length > 0 ||
+        selectedTasks.length > 0
+    );
+}
+
+document.getElementById('btn-back').addEventListener('click', async () => {
+    if (hasUnsavedEditorContent()) {
+        const ok = await confirmModal({
+            title: "Forlad scenarie?",
+            lines: [
+                "Du har indhold i scenariet, som ikke er gemt.",
+                "Hvis du forlader siden nu, vil det gå tabt."
+            ],
+            confirmText: "Forlad uden at gemme",
+            cancelText: "Bliv her"
+        });
+
+        if (!ok) return;
+    }
+
     resetEditorUI();
     switchView('dashboard');
 });
