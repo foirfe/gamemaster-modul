@@ -14,6 +14,7 @@ html, body {
     font-family: sans-serif; /*Fallback til ældre browsere*/
     font-family: var(--font-family);
     background-color: var(--background-color);
+    
 }
 h1, h2, h3 {
     font-weight: bold;
@@ -34,6 +35,17 @@ h1{
 
 .hidden {
     display: none;
+}
+
+#view-editor {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100vw;      
+    height: 100vh;     
+    overflow: hidden;  
+    background-color: var(--background-color);
+    z-index: 50;       
 }
 
 /* Error */
