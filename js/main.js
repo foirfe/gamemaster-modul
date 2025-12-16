@@ -313,9 +313,9 @@ document.getElementById('btn-save').addEventListener('click', () => {
 
 
 
-    currentScenario.scenarioTitle = nameInput.value || "Uden navn";
+    currentScenario.scenarioTitle = nameEl.value || "Uden navn";
     currentScenario.scenarioEnvironment = typeSelect.value === "choose" ? "" : typeSelect.value;
-    currentScenario.scenarioDescription = scenarioDesc.value || "Ingen beskrivelse";
+    currentScenario.scenarioDescription = descEl.value || "Ingen beskrivelse";
     currentScenario.scenarioCreatedTime = new Date(); // Opdater tidspunktet for redigering
     currentScenario.scenarioIsActive = true;
     // Konverter selectedTasks til det rigtige format

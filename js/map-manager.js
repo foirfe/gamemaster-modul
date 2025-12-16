@@ -167,7 +167,7 @@ export function removeTaskCircle(taskId) {
     }
 }
 
-exxport function upsertSearchRadius(lat, lng, radiusMeters) {
+export function upsertSearchRadius(lat, lng, radiusMeters) {
     if (!map) return;
 
     // Fjern ALT med vores class (robust hvis map-manager er loadet 2 gange)
