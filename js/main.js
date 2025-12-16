@@ -106,64 +106,63 @@ if (btnImportTasks && fileInputTasks) {
     btnImportTasks.addEventListener('click', () => {
         fileInputTasks.click();
     });
-
-    fileInputTasks.addEventListener('change', (event) => {
+    fileInputTasks.addEventListener('change', async (event) => {
         const file = event.target.files[0];
         if (!file) return;
-        readJSONFile(file, async (importedData) => {
-            const newTasks = Array.isArray(importedData) ? importedData : [importedData];
-            let addedCount = 0;
-            let updatedCount = 0;
-            let invalidCount = 0;
 
-            try {
-                importedData = await readJSONFile(file);
-            } catch (err) {
-                await confirmModal({
-                    title: "Kunne ikke læse fil",
-                    lines: [err.message, "Er det en gyldig JSON-fil?"],
-                    confirmText: "Prøv igen",
-                    cancelText: "Luk"
-                });
-                fileInputTasks.value = '';
-                return;
-            }
-            
-            newTasks.forEach(newTask => {
-                // VALIDERING: Er det faktisk en opgave?
-                if (newTask.ID === undefined || !newTask.Titel) {
-                    invalidCount++;
-                    return; // Spring over
-                }
-                const existingIndex = allTasks.findIndex(t => t.ID === newTask.ID);
-                if (existingIndex !== -1) {
-                    allTasks[existingIndex] = newTask;
-                    updatedCount++;
-                } else {
-                    allTasks.push(newTask);
-                    addedCount++;
-                }
-            });
-            filteredTasks = null;
-            document.getElementById('scenario-type').value = "alle";
-            refreshTaskListUI();
-            // FEEDBACK BESKED
-            let msg = `Opgave import færdig!\n`;
-            if (addedCount > 0) msg += `- Nye tilføjet: ${addedCount}\n`;
-            if (updatedCount > 0) msg += `- Opdateret: ${updatedCount}\n`;
-            if (invalidCount > 0) msg += `- Ugyldige data: ${invalidCount}\n(Du har nok valgt en forkert fil)`;
-
+        let importedData;
+        try {
+            importedData = await readJSONFile(file); // ✅ kun én gang, Promise-style
+        } catch (err) {
             await confirmModal({
-                title: "Opgaver importeret",
-                lines: msg.split("\n").filter(Boolean),
+                title: "Kunne ikke læse fil",
+                lines: [err.message, "Er det en gyldig JSON-fil?"],
                 confirmText: "OK",
                 cancelText: "Luk"
             });
-
             fileInputTasks.value = '';
+            return;
+        }
+
+        const newTasks = Array.isArray(importedData) ? importedData : [importedData];
+        let addedCount = 0;
+        let updatedCount = 0;
+        let invalidCount = 0;
+
+        newTasks.forEach(newTask => {
+            if (newTask.ID === undefined || !newTask.Titel) {
+                invalidCount++;
+                return;
+            }
+            const existingIndex = allTasks.findIndex(t => t.ID === newTask.ID);
+            if (existingIndex !== -1) {
+                allTasks[existingIndex] = newTask;
+                updatedCount++;
+            } else {
+                allTasks.push(newTask);
+                addedCount++;
+            }
         });
+
+        filteredTasks = null;
+        document.getElementById('scenario-type').value = "alle";
+        refreshTaskListUI();
+
+        let msg = `Opgaver import færdig!\n`;
+        if (addedCount > 0) msg += `- Nye tilføjet: ${addedCount}\n`;
+        if (updatedCount > 0) msg += `- Opdateret: ${updatedCount}\n`;
+        if (invalidCount > 0) msg += `- Ugyldige data: ${invalidCount}\n(Du har nok valgt en forkert fil)`;
+
+        await confirmModal({
+            title: "Opgaver importeret",
+            lines: msg.split("\n").filter(Boolean),
+            confirmText: "OK",
+            cancelText: "Luk"
+        });
+
+        fileInputTasks.value = '';
     });
-}
+    }
 
 if (radiusInput && radiusValue) {
     radiusValue.textContent = `${radiusInput.value} m`;
