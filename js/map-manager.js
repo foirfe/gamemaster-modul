@@ -152,6 +152,28 @@ export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber) {
         });
     });
     });*/
+// --- Click event på markøren (infoboks) ---
+marker.on("click", () => {
+    // Hent markerens lat/lng
+    const latlng = marker.getLatLng();
+
+    // Konverter til container-koordinater i kortet
+    const point = map.latLngToContainerPoint(latlng);
+
+    // Vis infoboksen
+    showInfoBox(
+        {
+            titel: `Opgave ${orderNumber}`,
+            text: `Task ID: ${taskId}`
+        },
+        point.x,
+        point.y,
+        map
+    );
+});
+
+  
+
 
     // Lav en layerGroup så vi kan have både marker + radius-cirkel (hvis ønsket)
     const layers = [marker];

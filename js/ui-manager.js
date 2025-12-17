@@ -332,9 +332,9 @@ export function confirmModal({
     });
 }
 
-/*
+
 //HER FORSØGER LIV AT KODE INFOBOKS
-export function showInfoBox(data, x, y) {
+export function showInfoBox(data, x, y, map) {
     //Fjern åben infoboks hvis du klikker på et nyt punkt
     const existingBox = document.querySelector(".infoboks");
     if (existingBox) existingBox.remove();
@@ -367,7 +367,8 @@ close.style.marginTop = "10px";
 close.addEventListener("click", () => box.remove());
 box.appendChild(close);
 
-//Tilføj boksen til body
-document.body.appendChild(box);
+/*//Tilføj boksen til body
+document.body.appendChild(box);*/
+map.getContainer().appendChild(box)
 }
-*/
+
