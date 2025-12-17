@@ -174,11 +174,20 @@ export function updateTaskSelectionUIAndMap(selectedTasks) {
             if (badge) badge.textContent = orderNumber;
         }
         // --- KORT ---
-        if (Array.isArray(t.Lokation) && t.Lokation.length >= 2) {
-            const lat = Number(t.Lokation[0]);
-            const lng = Number(t.Lokation[1]);
-            const radius = Number(t.Radius ?? 0);
-            upsertTaskCircle(t.ID, lat, lng, radius, orderNumber);
+       let lat, lng, radius;
+        if (Array.isArray(t.Lokation)) { 
+            lat = Number(t.Lokation[0]); lng = Number(t.Lokation[1]); radius = Number(t.Radius ?? 0);
+        } else { 
+            lat = t.mapLat; lng = t.mapLng; radius = t.mapRadiusInMeters;
+        }
+
+        const id = t.ID || t.taskId;
+
+        if (lat && lng) {
+            // Callback funktionen sendes med her:
+            upsertTaskCircle(id, lat, lng, radius, index + 1, (e) => {
+                showInfoBox(t, e.originalEvent.pageX, e.originalEvent.pageY);
+            });
         }
     });
 }
@@ -334,41 +343,66 @@ export function confirmModal({
 
 
 //HER FORSØGER LIV AT KODE INFOBOKS
-export function showInfoBox(data, x, y, map) {
+export function showInfoBox(task, x, y) {
     //Fjern åben infoboks hvis du klikker på et nyt punkt
     const existingBox = document.querySelector(".infoboks");
     if (existingBox) existingBox.remove();
 
+    const infoTitleText = task.Titel || task.taskTitle || "Uden titel"
+    const infoDescText = task.Beskrivelse || task.taskDescription || "Ingen beskrivelse";
+    const infoOptions = task.Valgmuligheder || task.options || [];
+
 //Infoboks
-const box = document.createElement("div");
-box.classList.add("infoboks");
-box.style.position = "absolute";
-box.style.top = `${y+10}px`;
-box.style.left = `${x+10}px`;
-box.style.padding = "10px";
-box.style.background = "white";
-box.style.border = "1px solid black";
-box.style.zIndex = "100";
+const infoBox = document.createElement("div");
+infoBox.classList.add("infoboks");
+infoBox.style.top = `${y+10}px`;
+infoBox.style.left = `${x+10}px`;
+
+//HEADER
+const infoHeader = document.createElement("div");
+infoHeader.className = "infoboks-header";
 
 //Titel
-const titel = document.createElement("h3");
-titel.textContent = data.titel;
-box.appendChild(titel);
-
-//Tekst
-const text = document.createElement("p");
-text.textContent = data.text;
-box.appendChild(text);
+const infoTitel = document.createElement("h3");
+infoTitel.textContent = infoTitleText;
 
 //Luk-knap
-const close = document.createElement("button");
-close.textContent = "x";
-close.style.marginTop = "10px";
-close.addEventListener("click", () => box.remove());
-box.appendChild(close);
+const infoCloseBtn = document.createElement("button");
+infoCloseBtn.className = "infoboks-close";
+infoCloseBtn.textContent = "x";
+infoCloseBtn.setAttribute("aria-label", "Luk");
+infoCloseBtn.style.marginTop = "10px";
+infoCloseBtn.addEventListener("click", (e) =>{
+    e.stopPropagation();
+    infoBox.remove();
+})
 
-/*//Tilføj boksen til body
-document.body.appendChild(box);*/
-map.getContainer().appendChild(box)
+infoHeader.appendChild(infoTitel);
+infoHeader.appendChild(infoCloseBtn);
+infoBox.appendChild(infoHeader);
+
+const infoBody = document.createElement("div");
+infoBody.className = "infoboks-body";
+
+//Tekst
+const infoText = document.createElement("p");
+infoText.textContent = infoDescText;
+infoBody.appendChild(infoText);
+
+if(infoOptions.length > 0){
+    const optionsHeader = document.createElement("h5");
+    optionsHeader.textContent = "Valgmuligheder:";
+    infoBody.appendChild(optionsHeader);
+
+    const optionsUl = document.createElement("ul");
+    infoOptions.forEach(option => {
+        const optionLi = document.createElement("li");
+        optionLi.textContent = typeof option === "string" ? option : (option.optionText || option);
+        optionsUl.appendChild(optionLi);
+    });
+    infoBody.appendChild(optionsUl);
+}
+infoBox.appendChild(infoBody);
+document.body.appendChild(infoBox);
 }
 

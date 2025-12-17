@@ -464,6 +464,37 @@ display: flex;
         box-shadow: 0 0 0 2px var(--secondary-color);
         font-size: 0.9rem;
     }
+.infoboks {
+    position: absolute;
+    background: white;
+    border: 1px solid black;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    width: 25%;
+}
+
+.infoboks-header{
+    background: var(--primary-color);
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    h3{
+        padding: 10px;
+    }
+    .infoboks-close{
+        padding: 10px;
+        background: none;
+        border: none;
+        color: #fff;
+        cursor:pointer;
+    }
+}
+.infoboks-body{
+        padding: 10px;
+}
+
+
 
 /* --- RESPONSIVITET --- */
 /* Tablet Skift til 2 kolonner */

@@ -124,7 +124,7 @@ export function addMarkerToMap(lat, lng, title) {
 
 // NYT: tegn / opdatér task som "badge-marker" (samme design som i listen)
 // + valgfri radius-cirkel (hvis radiusMeters > 0)
-export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber) {
+export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber, onClickCallback) {
     if (!map) return;
 
     // Fjern gammel, hvis der findes en
@@ -144,33 +144,11 @@ export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber) {
     const marker = L.marker([lat, lng], { icon });
 
     // Click til at åbne infoboks - Livs ongoing kode
-
-    /*document.addEventListener("DOMContentLoaded", () => {  
-    document.querySelectorAll(".task-order-badge").forEach(el => {
-        el.addEventListener("click", (e) => {
-            showInfoBox({ titel: "Opgave A", text: "Beskrivelse af opgaven" }, e.pageX, e.pageY);
-        });
-    });
-    });*/
-// --- Click event på markøren (infoboks) ---
-marker.on("click", () => {
-    // Hent markerens lat/lng
-    const latlng = marker.getLatLng();
-
-    // Konverter til container-koordinater i kortet
-    const point = map.latLngToContainerPoint(latlng);
-
-    // Vis infoboksen
-    showInfoBox(
-        {
-            titel: `Opgave ${orderNumber}`,
-            text: `Task ID: ${taskId}`
-        },
-        point.x,
-        point.y,
-        map
-    );
-});
+    if (onClickCallback){
+        marker.on('click', (e)=>{
+            onClickCallback(e);
+        })
+    }
 
   
 
