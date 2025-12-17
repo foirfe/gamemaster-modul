@@ -546,7 +546,7 @@ export async function editScenario(id) {
 
 
 
-function onPositionUpdate(position) {
+/* function onPositionUpdate(position) {
     const lat = position.coords.latitude;
     const lng = position.coords.longitude;
     const accuracy = position.coords.accuracy;
@@ -561,7 +561,7 @@ function onPositionUpdate(position) {
         ? manualLatLng
         : { lat, lng };
 
-    upsertUserLocation(active.lat, active.lng, accuracy, true);
+    upsertUserLocation(active.lat, active.lng, null, true);
 
     currentFilterLatLng = { lat: active.lat, lng: active.lng };
 
@@ -570,6 +570,43 @@ function onPositionUpdate(position) {
         hasCenteredOnce = true;
     }
 
+
+    if (nearbyFilterEnabled) {
+        upsertSearchRadius(active.lat, active.lng, currentRadiusMeters);
+        runTaskFilters();
+    }
+} */
+
+
+function onPositionUpdate(position) {
+    const lat = position.coords.latitude;
+    const lng = position.coords.longitude;
+
+    const rawAcc = Number(position.coords.accuracy);
+    const safeAcc =
+        Number.isFinite(rawAcc) && rawAcc > 0 && rawAcc <= 5000
+            ? rawAcc
+            : null; // hvis for upræcist/ugyldigt, så drop cirklen
+
+    lastGpsLatLng = { lat, lng };
+
+    if (manualLocationOverride && !manualLatLng) {
+        manualLocationOverride = false;
+    }
+
+    const active = manualLocationOverride && manualLatLng
+        ? manualLatLng
+        : { lat, lng };
+
+    // brug safeAcc i stedet for altid null
+    upsertUserLocation(active.lat, active.lng, safeAcc, true);
+
+    currentFilterLatLng = { lat: active.lat, lng: active.lng };
+
+    if (!hasCenteredOnce) {
+        centerMapOnLocation(active.lat, active.lng, 15);
+        hasCenteredOnce = true;
+    }
 
     if (nearbyFilterEnabled) {
         upsertSearchRadius(active.lat, active.lng, currentRadiusMeters);
@@ -786,11 +823,7 @@ document.getElementById('btn-create-new').addEventListener('click', async () => 
     initMap('map-container');
     resetEditor();
 
-    navigator.geolocation.watchPosition(onPositionUpdate, console.error, {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 15000
-    });
+    startGpsWatch(); // ✅ kun denne
 
     await loadTasks();
     refreshTaskListUI();
@@ -805,9 +838,14 @@ if (btnNearby) {
             ? "VIS OPGAVER I NÆRHEDEN ✓"
             : "VIS OPGAVER I NÆRHEDEN";
 
-        // ✅ vis/skjul slider UI
+        // vis/skjul slider UI
         if (radiusWrapper) {
             radiusWrapper.classList.toggle("hidden", !nearbyFilterEnabled);
+        }
+
+        if (!currentFilterLatLng) {
+            if (manualLatLng) currentFilterLatLng = { ...manualLatLng };
+            else if (lastGpsLatLng) currentFilterLatLng = { ...lastGpsLatLng };
         }
 
         if (nearbyFilterEnabled && !currentFilterLatLng) {
@@ -818,10 +856,9 @@ if (btnNearby) {
                 cancelText: "Luk"
             });
             nearbyFilterEnabled = false;
-
             btnNearby.classList.remove("is-active");
             btnNearby.textContent = "VIS OPGAVER I NÆRHEDEN";
-            if (radiusWrapper) radiusWrapper.classList.add("hidden");
+            radiusWrapper?.classList.add("hidden");
             return;
         }
 
