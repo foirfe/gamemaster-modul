@@ -247,6 +247,10 @@ function resetEditorUI() {
     document.getElementById('scenario-desc').value = "";
     document.getElementById('scenario-type').value = "alle";
 
+    manualLocationOverride = false;
+    manualLatLng = null;
+    hasCenteredOnce = false;
+
     // ryd validering UI
     document.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
     document.querySelectorAll(".field-error-msg").forEach(el => el.classList.remove("is-visible"));
@@ -399,6 +403,7 @@ document.getElementById('btn-save').addEventListener('click', async () => {
     // ✅ STOP hvis validering fejler (viser fejl under felter)
     if (!validateScenario({ nameEl, descEl, selectedTasks })) return;
 
+    startGpsWatch();
 
 
     currentScenario.scenarioTitle = nameEl.value || "Uden navn";
@@ -476,6 +481,14 @@ function resetEditor() {
 export async function editScenario(id) {
     const scenarios = getScenariosFromStorage();
     const foundScenario = scenarios.find(s => s.scenarioId === id);
+    startGpsWatch();
+
+    switchView('editor');
+    initMap('map-container');
+
+    manualLocationOverride = false;
+    manualLatLng = null;
+    hasCenteredOnce = false;
 
     if (!foundScenario) {
         console.error("Scenarie ikke fundet:", id);
@@ -540,20 +553,27 @@ function onPositionUpdate(position) {
 
     lastGpsLatLng = { lat, lng };
 
-    if (!manualLocationOverride) {
-        upsertUserLocation(lat, lng, null);
+    if (manualLocationOverride && !manualLatLng) {
+        manualLocationOverride = false;
+    }
 
-        // Centrer kun første gang, så kortet ikke "snapper tilbage"
-        if (!hasCenteredOnce) {
-            centerMapOnLocation(lat, lng, 15);
-            hasCenteredOnce = true;
-        }
+    const active = manualLocationOverride && manualLatLng
+        ? manualLatLng
+        : { lat, lng };
 
-        currentFilterLatLng = { lat, lng };
-    } else {
-        if (manualLatLng) {
-            upsertUserLocation(manualLatLng.lat, manualLatLng.lng, null);
-        }
+    upsertUserLocation(active.lat, active.lng, accuracy, true);
+
+    currentFilterLatLng = { lat: active.lat, lng: active.lng };
+
+    if (!hasCenteredOnce) {
+        centerMapOnLocation(active.lat, active.lng, 15);
+        hasCenteredOnce = true;
+    }
+
+
+    if (nearbyFilterEnabled) {
+        upsertSearchRadius(active.lat, active.lng, currentRadiusMeters);
+        runTaskFilters();
     }
 }
 
@@ -814,6 +834,19 @@ if (btnNearby) {
             clearSearchRadius();
         }
     });
+}
+
+//start gps en gang
+let geoWatchId = null;
+
+function startGpsWatch() {
+    if (geoWatchId !== null) return; // kører allerede
+
+    geoWatchId = navigator.geolocation.watchPosition(
+        onPositionUpdate,
+        (err) => console.error("GPS fejl:", err),
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+    );
 }
 
  //Midlertidig placering af click til infoboks
