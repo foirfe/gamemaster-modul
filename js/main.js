@@ -341,7 +341,8 @@ async function loadTasks() {
     try {
         console.log('loadTasks() kaldt');
 
-        const response = await fetch('data/dummy.json');  // filen i /data
+        const response = await fetch('data/dummy.json');  // Dummy filen i /data
+       // const response = await fetch('http://localhost:3000/data') //Server data
         console.log('HTTP status for dummy.json:', response.status);
 
         if (!response.ok) {
