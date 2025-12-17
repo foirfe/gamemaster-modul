@@ -20,7 +20,7 @@ button {
     }
 }
 .btn-primary{
-        padding: 1% 2.5%;
+        padding: 1rem 1.5rem;
         display: flex;
         align-items: center;
         justify-content: center;

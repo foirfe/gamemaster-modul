@@ -421,7 +421,7 @@ document.getElementById('btn-save').addEventListener('click', async () => {
     } else if (hasLand) {
         currentScenario.scenarioEnvironment = "Land";
     } else if (hasWater) {
-        currentScenario.scenarioEnvironment = "Vand";
+        currentScenario.scenarioEnvironment = "Sø";
     } else {
         // Fallback hvis ingen tasks er valgt, eller tasks uden type
         currentScenario.scenarioEnvironment = "Kombineret";

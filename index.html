@@ -16,11 +16,16 @@
         <!--DASHBOARD VIEW-->
         <section id="view-dashboard" class="view-active" aria-label="Scenarie oversigts-panel">
         <div id="header-row">
-            <h1>Scenarier</h1>
-            <button id="btn-import-scenarios" class="btn-primary">Importér Scenarier<span class="material-symbols-outlined" aria-hidden="true">
-                        upload
-                    </span></button>
-            <input type="file" id="import-file-input" accept=".json" style="display: none;" />
+            <div class="header-title">
+                <img src="assets/hjv-red.png" alt="Hjemmeværnet"/>
+                <h1>Scenarier</h1>
+            </div>
+            <div class="header-div">
+                <button id="btn-import-scenarios" class="btn-primary">Importér Scenarier<span class="material-symbols-outlined" aria-hidden="true">
+                    upload
+                </span></button>
+                <input type="file" id="import-file-input" accept=".json" style="display: none;" />
+            </div>
             <button id="btn-create-new" class="btn-primary">Opret Nyt Scenarie<span class="material-symbols-outlined" aria-hidden="true">
                         add
                     </span></button>
@@ -89,7 +94,7 @@
                 <select name="type" id="scenario-type">
                     <option value="alle">Alle</option>
                     <option value="Land">Land</option>
-                    <option value="Vand">Vand</option>
+                    <option value="Vand">Sø</option>
                 </select>
                 <div id="div-task-list" class="scrollable-list">
                     <ul id="task-list" class="task-list"></ul>

@@ -4,9 +4,22 @@
   justify-content: space-between;
   align-items: flex-end; /* Aligns text to bottom near the line */
   margin-bottom: 5px;
-  h1{
-    margin: 2% 0 0 5%;
+}
+#header-row .header-title{
+  display: flex;
+  align-items: flex-end;
+  margin: 2% 0 0 5%;
+  width: 30%;
+}
+ .header-title h1 {
+   margin:0;
+ }
+  img{
+    margin-right: 2%;
+    width: 10%;
   }
+#header-row .header-div{
+  width: 30%;
 }
 .thick-separator {
   border: none;
