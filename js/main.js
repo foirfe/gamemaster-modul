@@ -2,7 +2,7 @@
 import { initMap, clearSearchRadius, upsertSearchRadius, centerMapOnLocation, upsertUserLocation } from './map-manager.js';
 import { Scenario } from './models.js';
 import { readJSONFile, saveScenarioToStorage, getScenariosFromStorage, deleteScenario } from './data-manager.js';
-import { updateDashboardView, renderTaskList, updateTaskSelectionUIAndMap, mapTasksToScenario, confirmModal } from './ui-manager.js';
+import { updateDashboardView, renderTaskList, updateTaskSelectionUIAndMap, mapTasksToScenario, confirmModal, showInfoBox } from './ui-manager.js';
 
 
 const btnImportDashboard = document.getElementById('btn-import-scenarios');
@@ -341,7 +341,8 @@ async function loadTasks() {
     try {
         console.log('loadTasks() kaldt');
 
-        const response = await fetch('data/dummy.json');  // filen i /data
+        const response = await fetch('data/dummy.json');  // Dummy filen i /data
+       // const response = await fetch('http://localhost:3000/data') //Server data
         console.log('HTTP status for dummy.json:', response.status);
 
         if (!response.ok) {
@@ -886,8 +887,8 @@ function startGpsWatch() {
     );
 }
 
- //Midlertidig placering af click til infoboks
-/*document.querySelectorAll(".task-order-badge").forEach(el => {
+/* //Midlertidig placering af click til infoboks
+document.querySelectorAll(".task-order-badge").forEach(el => {
     el.addEventListener("click", (e) => {
         console.log("Badge clicked!", e.pageX, e.pageY);
         showInfoBox({ titel: "Opgave A", text: "Beskrivelse af opgaven" }, e.pageX, e.pageY);

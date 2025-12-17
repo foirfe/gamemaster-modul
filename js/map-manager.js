@@ -124,7 +124,7 @@ export function addMarkerToMap(lat, lng, title) {
 
 // NYT: tegn / opdatér task som "badge-marker" (samme design som i listen)
 // + valgfri radius-cirkel (hvis radiusMeters > 0)
-export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber) {
+export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber, onClickCallback) {
     if (!map) return;
 
     // Fjern gammel, hvis der findes en
@@ -144,14 +144,14 @@ export function upsertTaskCircle(taskId, lat, lng, radiusMeters, orderNumber) {
     const marker = L.marker([lat, lng], { icon });
 
     // Click til at åbne infoboks - Livs ongoing kode
+    if (onClickCallback){
+        marker.on('click', (e)=>{
+            onClickCallback(e);
+        })
+    }
 
-    /*document.addEventListener("DOMContentLoaded", () => {  
-    document.querySelectorAll(".task-order-badge").forEach(el => {
-        el.addEventListener("click", (e) => {
-            showInfoBox({ titel: "Opgave A", text: "Beskrivelse af opgaven" }, e.pageX, e.pageY);
-        });
-    });
-    });*/
+  
+
 
     // Lav en layerGroup så vi kan have både marker + radius-cirkel (hvis ønsket)
     const layers = [marker];
