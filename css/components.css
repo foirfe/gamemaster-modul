@@ -510,6 +510,12 @@ display: flex;
         flex-direction: column;
         align-items: center;
     }
+    #header-row .header-title{
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+        margin: 2% auto;
+    }
     .scenario-list {
         grid-template-columns: 1fr;
     }
