@@ -44,7 +44,13 @@ export function initMap(elementId) {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
-
+    map.on('movestart', () => {
+        const infoBox = document.querySelector(".infoboks");
+        if (infoBox) {
+            infoBox.remove();
+        }
+    });
+ 
     return map;
 }
 
